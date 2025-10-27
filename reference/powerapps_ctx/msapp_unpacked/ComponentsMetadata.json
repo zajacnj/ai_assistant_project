@@ -1,0 +1,18 @@
+{
+  "Components": [
+    {
+      "Name": "TaskInputField",
+      "TemplateName": "e8b26d673ec24f3d93ec5f143295bdec",
+      "Description": "",
+      "AllowCustomization": true,
+      "AllowAccessToGlobals": false
+    },
+    {
+      "Name": "TaskSection",
+      "TemplateName": "85c6cffc491041e3b959a578e2cc3b48",
+      "Description": "",
+      "AllowCustomization": true,
+      "AllowAccessToGlobals": false
+    }
+  ]
+}

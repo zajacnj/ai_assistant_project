@@ -1,0 +1,12 @@
+# Power Fx → Python/TypeScript Port Cheatsheet (minimal)
+- If( cond, a, b ) → a if cond else b
+- !cond → not cond
+- And(a,b) → (a and b); Or(a,b) → (a or b)
+- IsBlank(x) → x is None or x==""
+- Coalesce(a,b) → a if a not null/blank else b
+- With({k:v}, expr) → inline temp vars; in TS use const/let blocks.
+- LookUp(tbl, cond) → first([r for r in tbl if cond(r)])
+- Filter(tbl, cond) → [r for r in tbl if cond(r)]
+- SortByColumns(tbl, "Col", Ascending) → sorted(tbl, key=lambda r: r["Col"])
+- ForAll(tbl, expr) → for r in tbl: ...
+- Navigate(Scr, ...) → router.push('/Scr')

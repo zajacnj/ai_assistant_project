@@ -1,0 +1,17 @@
+# AI Assistant Application - Required Python Packages
+# 
+# To install all packages at once, run:
+# pip install -r requirements.txt
+
+streamlit>=1.25.0
+pandas>=2.0.0
+sqlite3
+requests>=2.30.0
+python-dotenv>=1.0.0
+
+# Optional packages for advanced features:
+# openai>=0.27.0                    # For ChatGPT integration
+# anthropic>=0.3.0                  # For Claude integration  
+# streamlit-authenticator>=0.2.0    # For user authentication
+# plotly>=5.15.0                    # For advanced charts
+# sharepy>=2.0.0                    # For SharePoint integration

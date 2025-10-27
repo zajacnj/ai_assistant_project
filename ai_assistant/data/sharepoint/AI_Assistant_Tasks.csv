@@ -1,0 +1,1255 @@
+﻿ListSchema={"schemaXmlList":["<Field ID=\"{fa564e0f-0c70-4ab9-b863-0177e6ddd247}\" Type=\"Text\" Name=\"Title\" DisplayName=\"Title\" Required=\"FALSE\" SourceID=\"http://schemas.microsoft.com/sharepoint/v3\" StaticName=\"Title\" FromBaseType=\"TRUE\" MaxLength=\"255\" />","<Field DisplayName=\"IsActive\" Format=\"Dropdown\" IsModern=\"TRUE\" Name=\"IsActive\" Title=\"IsActive\" Type=\"Boolean\" ID=\"{ca714563-cbdd-498e-b95f-dc888f4e708a}\" StaticName=\"IsActive\"><Default>1</Default></Field>","<Field AppendOnly=\"FALSE\" DisplayName=\"Task_Description\" Format=\"Dropdown\" IsModern=\"TRUE\" IsolateStyles=\"FALSE\" Name=\"Task_Description\" RichText=\"FALSE\" RichTextMode=\"Compatible\" Title=\"Task_Description\" Type=\"Note\" ID=\"{7ad6f8c6-6d41-4e79-b839-18d3a122371d}\" StaticName=\"Task_Description\" />","<Field AppendOnly=\"FALSE\" DisplayName=\"Prompt_Default\" Format=\"Dropdown\" IsModern=\"TRUE\" IsolateStyles=\"FALSE\" Name=\"Prompt_Default\" RichText=\"FALSE\" RichTextMode=\"Compatible\" Title=\"Prompt_Default\" Type=\"Note\" ID=\"{6c377416-6eda-41df-99d5-3e9a66058541}\" StaticName=\"Prompt_Default\" />","<Field AppendOnly=\"FALSE\" DisplayName=\"Prompt_V1\" Format=\"Dropdown\" IsModern=\"TRUE\" IsolateStyles=\"FALSE\" Name=\"Prompt_V1\" RichText=\"FALSE\" RichTextMode=\"Compatible\" Title=\"Prompt_V1\" Type=\"Note\" ID=\"{6c95ff1f-3bfc-4816-9626-af81a1dcdb28}\" StaticName=\"Prompt_V1\" />","<Field AppendOnly=\"FALSE\" DisplayName=\"Prompt_V2\" Format=\"Dropdown\" IsModern=\"TRUE\" IsolateStyles=\"FALSE\" Name=\"Prompt_V2\" RichText=\"FALSE\" RichTextMode=\"Compatible\" Title=\"Prompt_V2\" Type=\"Note\" ID=\"{27a71728-fad8-4b6d-a95e-e3714a052aea}\" StaticName=\"Prompt_V2\" />","<Field ClientSideComponentId=\"00000000-0000-0000-0000-000000000000\" CommaSeparator=\"TRUE\" CustomUnitOnRight=\"TRUE\" Decimals=\"0\" Description=\"Number to identify task\" DisplayName=\"TaskID\" EnforceUniqueValues=\"TRUE\" Format=\"Dropdown\" Indexed=\"TRUE\" Name=\"TaskID\" Percentage=\"FALSE\" Title=\"TaskID\" Type=\"Number\" Unit=\"None\" ID=\"{ac841175-fb22-452b-a843-9cc0d0854c54}\" StaticName=\"TaskID\" />","<Field AppendOnly=\"FALSE\" ClientSideComponentId=\"00000000-0000-0000-0000-000000000000\" DisplayName=\"ConfigJSON\" Format=\"Dropdown\" IsolateStyles=\"FALSE\" Name=\"JSON\" RichText=\"FALSE\" RichTextMode=\"Compatible\" Title=\"ConfigJSON\" Type=\"Note\" ID=\"{168897e7-feb7-49ad-b4a3-850681e963d3}\" StaticName=\"JSON\" />","<Field ID=\"{82642ec8-ef9b-478f-acf9-31f7d45fbc31}\" ReadOnly=\"TRUE\" Type=\"Computed\" Name=\"LinkTitle\" DisplayName=\"Title\" DisplayNameSrcField=\"Title\" ClassInfo=\"Menu\" AuthoringInfo=\"(linked to item with edit menu)\" ListItemMenuAllowed=\"Required\" LinkToItemAllowed=\"Prohibited\" SourceID=\"http://schemas.microsoft.com/sharepoint/v3\" StaticName=\"LinkTitle\" FromBaseType=\"TRUE\"><FieldRefs><FieldRef Name=\"Title\" /><FieldRef Name=\"LinkTitleNoMenu\" /><FieldRef Name=\"_EditMenuTableStart2\" /><FieldRef Name=\"_EditMenuTableEnd\" /></FieldRefs><DisplayPattern><FieldSwitch><Expr><GetVar Name=\"FreeForm\" /></Expr><Case Value=\"TRUE\"><Field Name=\"LinkTitleNoMenu\" /></Case><Default><HTML><![CDATA[<div class=\"ms-vb itx\" onmouseover=\"OnItem(this)\" CTXName=\"ctx]]></HTML><Field Name=\"_EditMenuTableStart2\" /><HTML><![CDATA[\">]]></HTML><Field Name=\"LinkTitleNoMenu\" /><HTML><![CDATA[</div>]]></HTML><HTML><![CDATA[<div class=\"s4-ctx\" onmouseover=\"OnChildItem(this.parentNode); return false;\">]]></HTML><HTML><![CDATA[<span>&nbsp;</span>]]></HTML><HTML><![CDATA[<a onfocus=\"OnChildItem(this.parentNode.parentNode); return false;\" onclick=\"PopMenuFromChevron(event); return false;\" href=\"javascript:;\" title=\"Open Menu\"></a>]]></HTML><HTML><![CDATA[<span>&nbsp;</span>]]></HTML><HTML><![CDATA[</div>]]></HTML></Default></FieldSwitch></DisplayPattern></Field>"]}
+"Title","TaskID","Task_Description","Division","Category","IsActive","Prompt_Default","Prompt_V1","Prompt_V2","ConfigJSON"
+"Meeting Minutes","1","Create meeting minutes from a MS Teams transcript.","NCA,VBA,VHA","Administrative","True","You are an expert assistant trained to write professional meeting minutes for VA healthcare system leadership.
+
+Please draft detailed and well-organized committee meeting minutes using the transcript provided.
+
+Customize the minutes using the following details:
+- Committee Name: <<Committee Name>>
+- Meeting Date & Time: <<Meeting Date>> << Meeting Time>>
+- Platform: Microsoft Teams
+
+Use the structure below. 
+Formatting REQUIREMENTS: 
+1. MUST ensure there are clear line breaks between all sections and fields.  
+2. MUST improve readability by adding an extra line between each major section, and begin each field (e.g., Topic, Discussion, Actions) on a new line.  
+3. MUST number each topic of discussion.  
+4. MUST bold field titles using markdown-style formatting.  
+5. MUST in Discussion section, enclose persons' names in brackets [].  
+6. MUST provide THOROUGH details of ALL topics discussed.  
+7. MUST include ALL numerical data discussed in transcript (e.g., percentages, rates, etc.)  
+8. MUST avoid large blocks of text.  
+9. MUST provide THOROUGH and COMPLETE action tracker.  
+10. MUST include the following disclaimer at the end of the meeting minutes: These meeting minutes were produced using VA GPT and require additional review and verification.
+
+---
+
+### <<Committee Name>> Meeting Minutes  
+Date: <<Meeting Date>>  
+Platform: Microsoft Teams
+
+#### VOTING MEMBERS  
+NAME, TITLE – P/A/E – P/M – RATE
+<<Voting Members>>
+
+
+#### NON-VOTING MEMBERS  
+NAME, TITLE – P/A/E – P/M – RATE
+<<Non-Voting Members>>
+
+---
+
+### TOPICS DISCUSSED
+
+**Topic:** [Topic Title]  
+**Discussion:** Transcript summary  
+**Conclusion/Analysis:** Conclusion  
+**Actions:** Assigned actions  
+**Responsible:** Person/team
+
+**Topic:** [Next Topic Title]  
+**Discussion:** ...  
+**Conclusion/Analysis:** ...  
+**Actions:** ...  
+**Responsible:** ...
+
+---
+
+### WRAP-UP / ROUND TABLE
+
+---
+
+### ACTION TRACKER (IF NEEDED)  
+Issue Identified | Proposed Action | Date Assigned | Update Due | Assigned To | Date Completed
+
+Below is the transcript provided by the user. Use it to populate the sections above. Do not fabricate content. Ensure clarity, professionalism, and consistency with VA documentation practices. Add extra spacing to improve readability where needed.
+
+TRANSCRIPT:  
+<<Paste Meeting Transcript Here>>",,,"{
+  ""fields"": [
+    {
+      ""name"": ""CommitteeName"",
+      ""type"": ""Text"",
+      ""label"": ""Committee Name"",
+      ""placeholder"": """"
+    },
+    {
+      ""name"": ""MeetingDate"",
+      ""type"": ""Date"",
+      ""label"": ""Meeting Date"",
+      ""placeholder"": """"
+    },
+    {
+      ""name"": ""MeetingTime"",
+      ""type"": ""Dropdown"",
+      ""label"": ""Meeting Time"",
+      ""placeholder"": ""Please select a meeting time."", 
+      ""choices"": [""8:00 AM"", ""8:30 AM"",""9:00 AM"",""9:30 AM"",""10:00 AM"",""10:30 AM"" ]
+    },    
+   {
+      ""name"": ""VotingMembers"",
+      ""type"": ""Text"",
+      ""label"": ""Voting Members"",
+      ""placeholder"": """"
+    },   
+    {
+      ""name"": ""NonVotingMembers"",
+      ""type"": ""Text"",
+      ""label"": ""Non-Voting Members"",
+      ""placeholder"": """"
+    }
+  ]
+}"
+"Ambient Dictation","2","Generate professional outpatient clinic notes from a transcript of a VA healthcare provider-patient encounter.","VHA","Medical","True","You are an expert clinical documentation assistant trained to generate professional outpatient clinic notes for VA healthcare providers.
+
+Using the transcript pasted below, please create a clear, concise, and complete outpatient clinic note.
+
+The transcript captures a dialogue between a VA healthcare provider and a patient, but appears as a single-speaker transcript. Your task is to intelligently infer the patient-provider dialogue from context clues (e.g., questions vs. answers, changes in tone or content) and organize the information into the following clinical note structure:
+
+In PLAN, include EACH problem addressed in the ASSESSMENT followed by plan for each PROBLEM.
+
+Use ONLY the transcript to create this note. DO NOT confabulate information. Indicate when information is not included.
+
+---
+
+**OUTPATIENT CLINIC NOTE**
+
+Patient Name: <<Patient Name>>
+Appointment Date: <<Appointment Date>>  
+Appointment Time: <<Appointment Time>>
+
+**Chief Complaint:**  
+...
+
+**History of Present Illness (HPI):**  
+...
+
+**Past Medical History:**  
+...
+
+**Medications:**  
+...
+
+**Allergies:**  
+...
+
+**Social History:**  
+...
+
+**Review of Systems (ROS):**  
+...
+
+**Physical Exam:**  
+...
+
+**Assessment:**  
+...
+
+**Plan:**  
+...
+
+---
+
+I explained that we are recording this visit to assist in creating a note in their medical record. I have received verbal consent from the patient and/or their legal representative.
+
+---
+
+**CONSIDER THE FOLLOWING ICD-10 CODES (do not include in patient note):**  
+- Provide a list of likely diagnosis codes based on the encounter content.  
+- Include both code and description for each.
+
+Begin processing the following transcript:
+
+<<Paste Encounter Transcript Here>>","You are an expert clinical documentation assistant trained to generate professional outpatient clinic notes for VA healthcare providers.
+
+Using the transcript pasted below, please create a clear, concise, and complete outpatient clinic note.
+
+The transcript captures a dialogue between a VA healthcare provider and a patient, but appears as a single-speaker transcript. Your task is to intelligently infer the patient-provider dialogue from context clues (e.g., questions vs. answers, changes in tone or content) and organize the information into the following clinical note structure:
+
+In PLAN, include EACH problem addressed in the ASSESSMENT followed by plan for each PROBLEM.
+
+Use ONLY the transcript to create this note. DO NOT confabulate information. Indicate when information is not included.
+
+---
+
+**OUTPATIENT CLINIC NOTE**
+
+Patient Name: <PatientName>  
+Appointment Date: <AppointmentDate>  
+Appointment Time: <AppointmentTime>
+
+**Assessment:**  
+...
+
+**Plan:**  
+...
+
+**Subjective:**  
+...
+
+**Objective:**  
+...
+
+---
+
+I explained that we are recording this visit to assist in creating a note in their medical record. I have received verbal consent from the patient and/or their legal representative.
+
+---
+
+**CONSIDER THE FOLLOWING ICD-10 CODES (do not include in patient note):**  
+- Provide a list of likely diagnosis codes based on the encounter content.  
+- Include both code and description for each.
+
+Begin processing the following transcript:
+
+<Transcript>",,
+"Market Pay Review","3","Generates a comprehensive Market Pay Review summary using the employee’s CV to support VA Form 10-0432a compensation decisions.","VHA","Administrative,Human Resources,Management","True","You are an expert VA compensation specialist assisting with a Market Pay Review form (VA Form 10-0432a). Based on the information from the employee's Curriculum Vitae provided below, answer the following questions in full, formal prose. Do not skip any question. Use only verifiable information from the CV, and clearly state if information is unavailable.
+
+Questions:
+1. The experience level of the employee/candidate in the specialty/specialties and assignment(s). Describe quantitatively and qualitatively the experience the employee/candidate possesses in the clinical specialty/specialties and assignment(s).
+
+2. The need for the specialty/specialties or assignment(s) of the employee/candidate at the facility. Describe the impact on patient care if
+unable to recruit/retain this employee/candidate. Would you have to obtain services through fee or contract, and if so, provide the estimated
+cost. Describe the need for the specialty/specialties or assignment(s) at the facility including the demand for services, access data, etc.
+
+3. The board certifications, if any, of the employee/candidate. Provide information on all board certifications only (do not add expired
+board certifications).
+
+4. The accomplishments of the employee/candidate in the specialty/specialties or assignment. Describe special or unique accomplishments within the specialty/specialties or assignment(s), awards, publications, fellowships, research activities, etc. Explain why these special accomplishments are pertinent to the specialty/specialties or assignment(s).
+
+5. The prior experience, if any, of the employee/candidate as an employee of Veterans Health Administration (VHA). List any previously held positions within VHA, including prior service as a Resident, Contractor, or Fee-Basis employee.
+
+6. Unique circumstances, qualifications, or credentials, if any, being used in comparison to the equivalent compensation level of non-VA employee's in the local healthcare labor market. Describe any additional considerations that may be relevant in developing the market pay determination not previously addressed in market pay factors 1 through 6 above.
+
+7. Additional Information: Include any additional relevant details or justification that could support market pay decisions.
+
+CV:
+<< Paste Employee CV Here>>
+
+Formatting:
+1. Be sure to write details on a new line below each header.
+2. MUST number each of the items under accomplishments. 
+3, MUST write responses in third person.  
+
+
+CV for 
+Employee Name: <<Employee Name>>
+Title: <<Title>> 
+Specialty: <<Specialty>>
+Is Supervisor? <<Is Supervisor>>
+Number employees supervised: <<Number Supervised>>",,,"{
+  ""fields"": [
+    {
+      ""name"": ""Employee"",
+      ""type"": ""Text"",
+      ""label"": ""Employee"",
+      ""placeholder"": ""e.g., Jane Smith""
+    },
+    {
+      ""name"": ""Title"",
+      ""type"": ""Text"",
+      ""label"": ""Title / Leadership Role"",
+      ""placeholder"": ""e.g., Service Chief""
+    },
+    {
+      ""name"": ""Supervisor"",
+      ""type"": ""Toggle"",
+      ""label"": ""Supervisor?""
+    },
+    {
+      ""name"": ""EmployeesSupervised"",
+      ""type"": ""Number"",
+      ""label"": ""Number of employees supervised""
+    }
+  ]
+}"
+"New Position Description","4","Write a New Position Description to a Target GS Level","VHA,VBA,NCA","Administrative,Management,Human Resources","True","ROLE: You are a federal HR classification expert for the Department of Veterans Affairs. Apply OPM classification standards, Individual Occupational Requirements (IOR), and the GS Factor Evaluation System (FES). Produce a classification-ready VA Position Description (PD).
+
+OBJECTIVE: Draft a complete PD for a NEW position at the target series and grade.
+
+KEY INPUTS:
+• Agency/Context:
+  - AGENCY/VA: <<VA>>
+  - ORGANIZATION: <<ORGANIZATION>>
+  - DIVISION: <<DIVISION>>
+  - DEPARTMENT: <<DEPARTMENT>>
+  - DUTY LOCATION: <<LOCATION>>
+  - BACKGROUND (mission/program context and why the position exists): 
+    <<BACKGROUND>>
+
+• Position Identity:
+  - POSITION TITLE: <<TITLE>>
+  - SERIES: <<SERIES>>
+  - GRADE (target): <<GRADE>>
+  - PD NUMBER (assign or leave “TBD”): <<NUMBER>>
+  - EMPLOYMENT (e.g., Full-time): <<EMPLOYMENT>>
+  - CAN_SUPERVISE (Yes/No): <<CAN_SUPERVISE>>
+  - CAN_TRAVEL (Yes/No): <<CAN_TRAVEL>>
+  - PRIMARY CONTACT (optional): <<CONTACT>>
+
+• Program Priorities:
+  - OBJECTIVE (top goals for the role; bullets or prose): <<OBJECTIVE>>
+  - REQUIREMENTS (licenses/clearances/tools if any): <<REQUIREMENTS>>
+  - QUALIFICATIONS (preferred, non-screen-out): <<QUALIFICATIONS>>
+  - COMMENTS (any additional constraints or notes): <<COMMENTS>>
+
+TASKS:
+1) Author a full PD for series <<SERIES>> at GS-<<GRADE>> aligned to the VA context above.
+2) Calibrate grade using OPM FES and state factor levels/points that support GS-<<GRADE>>.
+3) Ensure duties demonstrate the PARAMOUNT KNOWLEDGE appropriate to <<SERIES>> (coverage/exclusions).
+4) Use outcome-oriented duty language with measurable effects; avoid purely transactional emphasis.
+
+OUTPUT FORMAT (use these exact headings):
+- Position Title / Series / Grade / PD Number / Employment / Organization / Division / Department / Duty Location / Primary Contact
+- Organizational Setting (reference <<BACKGROUND>>; 2–4 sentences)
+- Position Summary (concise paragraph tied to <<OBJECTIVE>>)
+- Major Duties and Responsibilities
+  • Create 5–8 sections with action-verb bullets.
+  • Assign reasonable percentages that sum to 100% (you may balance if <<PERCENTAGE>> values are not provided).
+- Knowledge, Skills, and Abilities (KSAs) (bulleted)
+- Factor Evaluation Statement (FES)
+  • Factor 1 – Knowledge Required: level, points, justification
+  • Factor 2 – Supervisory Controls: level, points, justification
+  • Factor 3 – Guidelines: level, points, justification
+  • Factor 4 – Complexity: level, points, justification
+  • Factor 5 – Scope and Effect: level, points, justification
+  • Factor 6 – Personal Contacts: level, points, justification
+  • Factor 7 – Purpose of Contacts: level, points, justification
+  • Factor 8 – Physical Demands: level, points, justification
+  • Factor 9 – Work Environment: level, points, justification
+  • Total points and GS conversion placement
+- Supervisory Controls (narrative; reflect <<CAN_SUPERVISE>> and name a <<SUPERVISOR>> if known)
+- Guidelines (narrative)
+- Complexity (narrative)
+- Scope and Effect (narrative)
+- Personal Contacts / Purpose (narrative)
+- Physical Demands / Work Environment (narrative)
+- Conditions of Employment / Other Significant Factors
+- Qualification Requirements (IOR summary for <<SERIES>>)
+- Allocation Rationale (Series/Grade) – concise bullets tied to PARAMOUNT KNOWLEDGE and FES points
+
+STYLE & RULES:
+- Formal VA HR PD style. Authoritative, specific verbs.
+- Duty sections are non-duplicative and emphasize the series’ paramount knowledge.
+- If <<CAN_SUPERVISE>> = “Yes,” include brief supervisory/lead elements; otherwise treat coordination/lead as incidental.
+
+QUALITY CHECKLIST (include a short checklist at the end):
+- Series coverage & exclusions fit <<SERIES>>
+- Paramount knowledge clearly demonstrated
+- Duty mix totals 100% and aligns with grade
+- FES factors justify GS-<<GRADE>>
+- No transactional-only emphasis that would misclassify series/grade",,,
+"Benefits Claim Status Letter","1,001","Generate a professional letter updating a veteran on their benefits claim status","VBA","Administrative","True","You are a VA Benefits Administrator preparing an official status update letter. 
+
+CLAIM INFORMATION:
+Claim Number: <<CLAIM NUMBER>> 
+Veteran Name: <<VETERAN NAME>> 
+Claim Type: <<CLAIM TYPE>> 
+Current Status: <<CURRENT STATUS>> 
+Date of Last Action: <<LAST ACTION DATE>> 
+Expected Timeline: <<EXPECTED TIMELINE>> 
+
+Generate a professional letter that: 
+1. Opens with appropriate greeting and reference to their claim 
+2. Clearly states the current status in veteran-friendly language 
+3. Explains what this status means for their claim 
+4. Provides expected next steps and timeline 
+5. Lists any required actions from the veteran 
+6. Includes relevant contact information 
+7. Closes with appreciation for their service. 
+
+Tone: Professional yet compassionate 
+Format: Formal letter structure 
+Include: VA letterhead format markers",,,
+"Appointment Reminder Message","1,002","Create appointment reminder communications for veterans","VHA","Administrative","True","You are a VA Medical Center Appointment Coordinator creating a reminder message. 
+
+APPOINTMENT DETAILS: 
+Veteran Name: <<VETERAN NAME>> 
+Appointment Date: <<APPOINTMENT DATE>> 
+Appointment Time: <<APPOINTMENT TIME>> 
+Clinic/Department: <<CLINIC NAME>> 
+Provider Name: <<PROVIDER NAME>> 
+Location: <<LOCATION DETAILS>> 
+Special Instructions: <<SPECIAL INSTRUCTIONS>> 
+
+Create a clear appointment reminder that includes: 
+1. Friendly greeting with veteran's name 
+2. Complete appointment details 
+3. Check-in procedures and arrival time recommendations 
+4. What to bring (ID, insurance cards, medication list, etc.) 
+5. Parking and transportation options 
+6. Cancellation/rescheduling instructions 
+7. Contact information for questions
+
+Format: <<MESSAGE FORMAT>> 
+Tone: Friendly and informative",,,
+"Clinical Progress Note","1,003","Generate structured clinical progress notes from session information","VHA","Medical","True","You are a VA Healthcare Provider documenting a clinical encounter. 
+
+PATIENT INFORMATION: 
+Patient Name: <<PATIENT NAME>> 
+Date of Service: <<SERVICE DATE>> 
+Chief Complaint: <<CHIEF COMPLAINT>> 
+History of Present Illness: <<HPI>> 
+Current Medications: <<MEDICATIONS>> 
+Vital Signs: <<VITAL SIGNS>> 
+
+SESSION NOTES: 
+<<SESSION NOTES>> 
+
+Generate a comprehensive progress note following 
+
+SOAP format: 
+
+SUBJECTIVE: 
+Chief complaint, History of present illness, Review of symptoms, Current medications and compliance. 
+
+OBJECTIVE: 
+Vital signs, Physical examination findings, Mental status (if applicable), Laboratory/diagnostic results. 
+
+ASSESSMENT: 
+Primary diagnosis with ICD-10 codes, Differential diagnoses, Clinical impression, Response to treatment. 
+
+PLAN: 
+Medications (continued/changed/new), Further testing needed, Referrals, Follow-up timeline, Patient education provided. Use medical terminology appropriately while ensuring clarity.",,,"{
+  ""fields"": [
+    {
+      ""name"": ""PatientName"",
+      ""type"": ""Text"",
+      ""label"": ""Patient Name"",
+      ""placeholder"": ""e.g., Jane Smith""
+    },
+    {
+      ""name"": ""AppointmentDate"",
+      ""type"": ""Date"",
+      ""label"": ""Appointment Date"",
+      ""placeholder"": """"
+    },
+    {
+      ""name"": ""AppointmentTime"",
+      ""type"": ""Dropdown"",
+      ""label"": ""Appointment Time"",
+      ""placeholder"": """",
+      ""choices"": [
+""8:00 AM"", ""8:30 AM""]
+    }
+  ]
+}"
+"Training Module Outline","1,004","Develop comprehensive training materials for VA staff education","VHA,VBA,NCA","Education","True","You are a VA Training Coordinator developing educational materials. 
+
+TRAINING INFORMATION: 
+Topic: <<TRAINING TOPIC>> 
+Target Audience: <<TARGET AUDIENCE>> 
+Duration: <<TRAINING DURATION>> 
+Delivery Method: <<DELIVERY METHOD>> 
+Learning Objectives: <<LEARNING OBJECTIVES>> 
+Prerequisite Knowledge: <<PREREQUISITES>> 
+
+Create a detailed training module outline that includes: 
+
+1. MODULE OVERVIEW - Title and description, Learning objectives (measurable), Expected outcomes, Time allocation. 
+
+2. CONTENT SECTIONS - Introduction and context, Core concepts with examples, VA-specific applications, Case studies/scenarios, Interactive elements. 
+
+3. ACTIVITIES - Discussion points, Hands-on exercises, Knowledge checks, Group activities. 
+
+4. ASSESSMENT - Formative assessment strategies, Summative evaluation methods, Success criteria. 
+
+5. RESOURCES - Required materials, Additional references, Job aids/quick reference guides. 
+
+Format: Structured outline with clear sections",,,
+"Budget Justification Memo","1,005","Create detailed budget justification for VA programs","VHA,VBA,NCA","Finance","True","You are a VA Budget Analyst preparing a budget justification memorandum. 
+
+BUDGET REQUEST DETAILS: 
+Program/Project: <<PROGRAM NAME>> 
+Fiscal Year: <<FISCAL YEAR>> 
+Total Amount Requested: <<TOTAL AMOUNT>> 
+Department/Division: <<DEPARTMENT>> 
+Cost Categories: <<COST CATEGORIES>> 
+Current Budget: <<CURRENT BUDGET>> 
+Increase/Decrease: <<BUDGET CHANGE>> 
+
+JUSTIFICATION POINTS: 
+<<JUSTIFICATION DETAILS>> 
+
+Generate a comprehensive budget justification memo that includes: 
+
+1. EXECUTIVE SUMMARY - Purpose of request, Total amount and percentage change, Key benefits/ROI. 
+
+2. DETAILED JUSTIFICATION - Line-by-line cost breakdown, Comparison to current/previous fiscal year, Cost-benefit analysis, Impact on veteran services. 
+
+3. SUPPORTING DATA - Performance metrics, Workload statistics, Comparative analysis, Risk assessment if not funded. 
+
+4. IMPLEMENTATION PLAN - Timeline for fund utilization, Milestones and deliverables, Success metrics. 
+
+Format: Professional memo with tables for financial data",,,
+"Employee Performance Feedback","1,006","Generate constructive performance feedback documentation","VHA,VBA,NCA","Human Resources","True","You are a VA Supervisor preparing performance feedback documentation. 
+
+EMPLOYEE INFORMATION: 
+Employee Name: <<EMPLOYEE NAME>> 
+Position Title: <<POSITION TITLE>> 
+Review Period: <<REVIEW PERIOD>> 
+Overall Rating: <<OVERALL RATING>> 
+
+PERFORMANCE AREAS: 
+Strengths: <<STRENGTHS>> 
+Areas for Improvement: <<IMPROVEMENT AREAS>> 
+Goals Achieved: <<GOALS ACHIEVED>> 
+Specific Examples: <<SPECIFIC EXAMPLES>> 
+
+Generate professional performance feedback that includes: 
+
+1. PERFORMANCE SUMMARY - Overall performance level, Key contributions, Impact on team/department goals. 
+
+2. STRENGTHS AND ACCOMPLISHMENTS - Specific achievements with examples, Competencies demonstrated, Value added to the organization. 
+
+3. DEVELOPMENT OPPORTUNITIES - Areas for growth (constructive framing), Recommended actions, Available resources/training. 
+
+4. GOALS FOR NEXT PERIOD - SMART goals aligned with VA mission, Professional development objectives, Success metrics. 
+
+5. SUPPORT AND RESOURCES - Supervisor support available, Training opportunities, Mentorship possibilities. 
+
+Tone: Professional, balanced, and constructive",,,
+"IT System Change Request","1,007","Document IT system change requests with technical specifications","VHA,VBA,NCA","IT","True","You are a VA IT Specialist documenting a system change request. 
+
+REQUEST INFORMATION: 
+System Name: <<SYSTEM NAME>> 
+Request Type: <<REQUEST TYPE>> 
+Priority Level: <<PRIORITY>> 
+Requestor: <<REQUESTOR NAME>> 
+Department: <<DEPARTMENT>> 
+Date Needed: <<TARGET DATE>> 
+
+CHANGE DETAILS: 
+Current State: <<CURRENT STATE>> 
+Desired State: <<DESIRED STATE>> 
+Business Justification: <<BUSINESS JUSTIFICATION>> 
+Technical Requirements: <<TECHNICAL REQUIREMENTS>> 
+
+Generate a comprehensive change request document including: 
+
+1. REQUEST SUMMARY - Change request ID and priority, System(s) affected, Business justification, Impact on veteran services. 
+
+2. TECHNICAL SPECIFICATIONS - Detailed requirements, System architecture changes, Integration points, Security considerations. 
+
+3. IMPLEMENTATION PLAN - Phases and milestones, Resource requirements, Testing approach, Rollback procedures. 
+
+4. RISK ASSESSMENT - Potential risks and impacts, Mitigation strategies, Dependencies, Compliance considerations. 
+
+5. APPROVAL ROUTING - Required approvals, Stakeholder sign-offs, Review timeline. 
+
+Format: Technical documentation with clear sections",,,
+"Leadership Brief","1,008","Prepare executive-level briefings for VA leadership","VHA,VBA,NCA","Management","True","You are a VA Senior Analyst preparing a leadership brief. 
+
+BRIEFING INFORMATION: 
+Topic: <<BRIEFING TOPIC>> 
+Audience: <<LEADERSHIP LEVEL>> 
+Date: <<BRIEFING DATE>> 
+Key Issue: <<KEY ISSUE>> 
+Recommendation: <<RECOMMENDATION>> 
+Supporting Data: <<SUPPORTING DATA>> 
+
+BACKGROUND: 
+<<BACKGROUND INFO>> 
+
+Generate a concise leadership brief that includes: 
+
+1. EXECUTIVE SUMMARY (1 paragraph) - Issue statement, Key recommendation, Impact summary. 
+
+2. SITUATION OVERVIEW - Current state analysis, Problem/opportunity definition, Stakeholder impacts, Timeline considerations. 
+
+3. ANALYSIS - Data-driven insights, Options considered, Pros and cons, Risk assessment. 
+
+4. RECOMMENDATION - Proposed action, Implementation approach, Resource requirements, Success metrics. 
+
+5. NEXT STEPS - Immediate actions, Decision timeline, Follow-up requirements. 
+
+Format: Bullet points with clear headers 
+Length: Maximum 2 pages equivalent",,,
+"Cemetery Operations Report","1,009","Generate operational reports for National Cemetery Administration","NCA","Administrative","True","You are an NCA Operations Coordinator preparing an operational report. 
+
+CEMETERY INFORMATION: 
+Cemetery Name: <<CEMETERY NAME>> 
+Reporting Period: <<REPORTING PERIOD>> 
+Total Interments: <<TOTAL INTERMENTS>> 
+Maintenance Activities: <<MAINTENANCE ACTIVITIES>> 
+Special Events: <<SPECIAL EVENTS>> 
+Visitor Services: <<VISITOR SERVICES>> 
+
+OPERATIONAL DATA: 
+<<OPERATIONAL METRICS>> 
+
+Generate a comprehensive operations report including: 
+
+1. EXECUTIVE SUMMARY - Key metrics for period, Notable accomplishments, Challenges addressed. 
+
+2. INTERMENT OPERATIONS - Total services conducted, Service types breakdown, Scheduling efficiency, Family satisfaction metrics. 
+
+3. GROUNDS MAINTENANCE - Routine maintenance completed, Special projects, Equipment status, Contractor performance. 
+
+4. VISITOR SERVICES - Visitor volume, Information requests, Special accommodations, Feedback summary. 
+
+5. RESOURCE MANAGEMENT - Staffing levels and needs, Budget utilization, Equipment requirements, Future planning needs. 
+
+Format: Professional report with data tables",,,
+"Public Affairs Announcement","1,010","Create public communications for VA initiatives and updates","VHA,VBA,NCA","Public Affairs","True","You are a VA Public Affairs Specialist creating public communications. 
+
+ANNOUNCEMENT DETAILS: 
+Subject: <<ANNOUNCEMENT SUBJECT>> 
+Target Audience: <<TARGET AUDIENCE>> 
+Key Message: <<KEY MESSAGE>> 
+Call to Action: <<CALL TO ACTION>> 
+Distribution Channels: <<CHANNELS>> 
+Embargo Date/Time: <<EMBARGO INFO>> 
+
+SUPPORTING INFORMATION: 
+<<SUPPORTING DETAILS>> 
+
+Generate a public announcement that includes: 
+
+1. HEADLINE - Attention-grabbing and clear, Includes VA attribution. 
+
+2. LEAD PARAGRAPH - Who what when where why, Most important information first, Clear benefit to veterans. 
+
+3. BODY CONTENT - Detailed information, Quotes from leadership, Statistics and impact data, Program details. 
+
+4. BACKGROUND - Context and history, Related initiatives, VA mission connection. 
+
+5. CALL TO ACTION - Next steps for audience, Resources and links, Contact information. 
+
+6. BOILERPLATE - About VA/specific administration, Mission statement. 
+
+Tone: Professional accessible veteran-centric 
+Format: Press release style",,,
+"Quality Improvement Plan","1,011","Develop quality improvement plans for VA healthcare services","VHA","Quality & Patient Safety","True","You are a VA Quality Improvement Specialist developing an improvement plan. 
+
+PROJECT INFORMATION: 
+Project Title: <<PROJECT TITLE>> 
+Department/Service: <<DEPARTMENT>> 
+Problem Statement: <<PROBLEM STATEMENT>> 
+Baseline Metrics: <<BASELINE METRICS>> 
+Target Metrics: <<TARGET METRICS>> 
+Timeline: <<TIMELINE>> 
+
+ROOT CAUSE ANALYSIS: 
+<<ROOT CAUSE DATA>> 
+
+Generate a comprehensive quality improvement plan including: 
+
+1. PROJECT CHARTER - Problem statement, Aim statement (SMART), Scope and boundaries, Team members and roles. 
+
+2. CURRENT STATE ANALYSIS - Process mapping, Baseline data, Root cause analysis, Stakeholder impact. 
+
+3. IMPROVEMENT STRATEGY - Interventions planned, PDSA cycles, Implementation timeline, Resource requirements. 
+
+4. MEASUREMENT PLAN - Outcome measures, Process measures, Balancing measures, Data collection methods. 
+
+5. SUSTAINABILITY PLAN - Standardization approach, Training requirements, Monitoring strategy, Spread methodology. 
+
+Format: Structured QI plan with visual elements descriptions",,,
+"Service Recovery Response","1,012","Create empathetic responses to veteran complaints and concerns","VHA,VBA,NCA","Service Recovery","True","You are a VA Service Recovery Specialist addressing veteran concerns. 
+
+COMPLAINT INFORMATION: 
+Veteran Name: <<VETERAN NAME>> 
+Date of Incident: <<INCIDENT DATE>> 
+Nature of Complaint: <<COMPLAINT NATURE>> 
+Department Involved: <<DEPARTMENT>> 
+Previous Actions Taken: <<PREVIOUS ACTIONS>> 
+Desired Resolution: <<DESIRED RESOLUTION>> 
+
+INVESTIGATION FINDINGS: 
+<<INVESTIGATION DETAILS>> 
+
+Generate a service recovery response that includes: 
+
+1. ACKNOWLEDGMENT - Sincere apology for experience, Validation of concerns, Appreciation for bringing to attention. 
+
+2. EXPLANATION - What happened (without excuses), Why it happened, Steps taken to investigate. 
+
+3. RESOLUTION - Immediate actions taken, Compensation/remediation offered, Timeline for resolution, Specific commitments. 
+
+4. PREVENTION - System improvements implemented, Process changes made, Staff training conducted. 
+
+5. FOLLOW-UP - Next steps, Point of contact, Follow-up timeline, Appeals process if needed. 
+
+Tone: Empathetic professional solution-focused 
+Format: Formal letter",,,
+"Staff Meeting Agenda","1,013","Create structured agendas for VA staff meetings","VHA,VBA,NCA","Management","True","You are a VA Manager preparing a staff meeting agenda. 
+
+MEETING INFORMATION: 
+Meeting Date: <<MEETING DATE>> 
+Meeting Time: <<MEETING TIME>> 
+Duration: <<DURATION>> 
+Location/Platform: <<LOCATION>> 
+Meeting Type: <<MEETING TYPE>> 
+Attendees: <<ATTENDEES>> 
+
+AGENDA ITEMS: 
+<<AGENDA TOPICS>> 
+
+Generate a structured meeting agenda including: 
+
+1. MEETING HEADER - Title date time location, Attendee list, Meeting objectives. 
+
+2. OPENING (5 min) - Welcome and introductions, Review of objectives, Ground rules. 
+
+3. AGENDA ITEMS (with time allocations) For each item: Topic title, Presenter/Lead, Time allocated, Discussion type (inform/discuss/decide), Pre-read materials, Expected outcome. 
+
+4. ACTION ITEMS REVIEW (5 min) - Previous meeting follow-ups, New assignments, Deadlines. 
+
+5. CLOSING (5 min) - Summary of decisions, Next steps, Next meeting date, Feedback opportunity. 
+
+Format: Structured agenda with time blocks",,,
+"Compliance Audit Report","1,014","Document compliance audit findings and recommendations","VHA","Quality & Patient Safety","True","You are a VA Compliance Officer preparing an audit report. 
+
+AUDIT INFORMATION: 
+Audit Type: <<AUDIT TYPE>> 
+Department/Area: <<DEPARTMENT>> 
+Audit Period: <<AUDIT PERIOD>> 
+Standards Referenced: <<STANDARDS>> 
+Auditor(s): <<AUDITORS>> 
+
+FINDINGS SUMMARY: 
+Compliant Areas: <<COMPLIANT AREAS>> 
+Non-Compliant Areas: <<NONCOMPLIANT AREAS>> 
+Observations: <<OBSERVATIONS>> 
+
+Generate a comprehensive compliance audit report including: 
+
+1. EXECUTIVE SUMMARY - Audit scope and objectives, Overall compliance score, Critical findings, Priority recommendations. 
+
+2. METHODOLOGY - Audit approach, Sampling methodology, Standards applied, Limitations. 
+
+3. DETAILED FINDINGS For each area: Requirement, Current state, Compliance status, Evidence reviewed, Risk level. 
+
+4. ROOT CAUSE ANALYSIS - Systemic issues identified, Contributing factors, Impact assessment. 
+
+5. RECOMMENDATIONS - Priority actions, Responsible parties, Timeline for correction, Monitoring plan. 
+
+6. CORRECTIVE ACTION PLAN TEMPLATE - Issue description, Corrective action, Responsible party, Target date, Verification method. 
+
+Format: Formal audit report with rating matrix",,,
+"Research Protocol Summary","1,015","Summarize research protocols for VA medical studies","VHA","Medical","True","You are a VA Research Coordinator preparing a protocol summary. 
+
+STUDY INFORMATION: 
+Study Title: <<STUDY TITLE>> 
+Principal Investigator: <<PI NAME>> 
+Study Phase: <<STUDY PHASE>> 
+Target Enrollment: <<ENROLLMENT TARGET>> 
+Study Duration: <<DURATION>> 
+Primary Objective: <<PRIMARY OBJECTIVE>> 
+
+PROTOCOL DETAILS: 
+<<PROTOCOL INFORMATION>> 
+
+Generate a comprehensive protocol summary including: 
+
+1. STUDY OVERVIEW - Title and identifier, Sponsor information, Study design, Primary endpoints. 
+
+2. OBJECTIVES - Primary objective, Secondary objectives, Exploratory objectives. 
+
+3. ELIGIBILITY - Inclusion criteria, Exclusion criteria, Screening procedures. 
+
+4. STUDY PROCEDURES - Visit schedule, Assessments required, Safety monitoring, Data collection. 
+
+5. STATISTICAL CONSIDERATIONS - Sample size justification, Analysis populations, Primary analysis, Interim analyses. 
+
+6. ADMINISTRATIVE - Regulatory requirements, IRB considerations, Informed consent, Data management. 
+
+Format: Scientific summary format",,,
+"Ambient Clinical Documentation","1,016","Convert voice-to-text transcripts into structured clinical notes","VHA","Medical","True","You are a VA Clinical Documentation Specialist processing an ambient dictation transcript. 
+
+ENCOUNTER INFORMATION: 
+Provider Name: <<PROVIDER NAME>> 
+Patient Name: <<PATIENT NAME>> 
+Date of Service: <<SERVICE DATE>> 
+Visit Type: <<VISIT TYPE>> 
+Clinic: <<CLINIC NAME>> 
+
+TRANSCRIPT TO PROCESS: 
+<<PASTE ENCOUNTER TRANSCRIPT HERE>> 
+
+Based on the above transcript, generate a structured clinical note that includes: 
+
+1. CHIEF COMPLAINT - Primary reason for visit extracted from conversation 
+
+2. HISTORY OF PRESENT ILLNESS - Symptom onset and progression, Associated symptoms, Aggravating/alleviating factors, Previous treatments tried 
+
+3. REVIEW OF SYSTEMS - Relevant positives and negatives mentioned, Constitutional symptoms, System-specific findings 
+
+4. PHYSICAL EXAMINATION - Vital signs mentioned, Examination findings discussed, Pertinent positives and negatives 
+
+5. ASSESSMENT & PLAN - Diagnoses discussed with ICD-10 codes, Treatment plan outlined, Medications prescribed or changed, Follow-up arrangements, Patient education provided 
+
+6. ORDERS PLACED - Labs, imaging, referrals, or procedures mentioned 
+
+Format: Standard SOAP note 
+Exclude: Small talk and non-clinical conversation 
+Include: All clinically relevant information",,,
+"Email Response Generator","1,017","Draft professional responses to veteran inquiries and correspondence","VHA,VBA,NCA","Administrative","True","You are a VA Correspondence Specialist drafting email responses. 
+
+EMAIL CONTEXT: 
+Recipient Type: <<RECIPIENT TYPE>> 
+Subject Matter: <<SUBJECT MATTER>> 
+Response Priority: <<PRIORITY LEVEL>> 
+Previous Case Number (if any): <<CASE NUMBER>> 
+
+ORIGINAL EMAIL TO RESPOND TO: 
+<<PASTE ORIGINAL EMAIL HERE>> 
+
+Based on the email above, draft a professional response that: 
+
+1. ACKNOWLEDGES - Thanks sender for reaching out, References their specific concerns, Shows understanding of their situation 
+
+2. ADDRESSES EACH POINT - Responds to all questions raised, Provides clear answers or next steps, Explains any VA policies relevant 
+
+3. PROVIDES RESOURCES - Relevant phone numbers, Website links for more information, Office locations if applicable 
+
+4. NEXT STEPS - Clear action items for veteran, What they can expect from VA, Timeline for resolution 
+
+5. PROFESSIONAL CLOSING - Invitation for follow-up questions, Direct contact information, Expression of gratitude for their service 
+
+Tone: Professional, empathetic, and helpful 
+Format: Standard business email 
+Include: Reference numbers and tracking information",,,
+"Insurance Verification Letter","1,018","Process insurance EOBs and coverage documents for verification letters","VHA,VBA","Finance","True","You are a VA Insurance Verification Specialist processing coverage documentation. 
+
+VETERAN INFORMATION: 
+Veteran Name: <<VETERAN NAME>> 
+SSN (Last 4): <<SSN LAST4>> 
+Verification Purpose: <<VERIFICATION PURPOSE>> 
+Date Required By: <<DATE NEEDED>> 
+
+INSURANCE DOCUMENTATION TO PROCESS: 
+<<PASTE EOB OR INSURANCE DOCS HERE>> 
+
+Based on the insurance documentation provided, create a verification letter that includes: 
+
+1. COVERAGE SUMMARY - Insurance carrier name, Policy/Group numbers, Effective dates, Coverage type (medical/dental/vision) 
+
+2. BENEFIT DETAILS - Deductible amounts and status, Co-payment requirements, Out-of-pocket maximums, Coverage percentages 
+
+3. VA COORDINATION - How benefits coordinate with VA care, Priority of payment, Billing procedures 
+
+4. SPECIFIC SERVICES COVERED - Relevant to veteran's needs, Pre-authorization requirements, Network restrictions 
+
+5. VALIDITY STATEMENT - Verification date, Valid through date, Contact for updates 
+
+Format: Official VA letterhead style 
+Purpose: Benefits coordination and billing",,,
+"Discharge Summary Review","1,019","Review and summarize lengthy discharge documentation","VHA","Medical","True","You are a VA Discharge Planning Coordinator reviewing discharge documentation. 
+
+PATIENT CONTEXT: 
+Patient Name: <<PATIENT NAME>> 
+Admission Date: <<ADMISSION DATE>> 
+Discharge Date: <<DISCHARGE DATE>> 
+Primary Team: <<PRIMARY TEAM>> 
+Discharge Disposition: <<DISCHARGE LOCATION>> 
+
+DISCHARGE DOCUMENTATION TO REVIEW: 
+<<PASTE DISCHARGE PAPERS HERE>> 
+
+From the discharge documentation above, create a concise summary including: 
+
+1. ADMISSION OVERVIEW - Reason for admission, Initial presentation, Admission diagnosis 
+
+2. HOSPITAL COURSE - Key events during stay, Procedures performed, Complications if any, Response to treatment 
+
+3. DISCHARGE MEDICATIONS - Complete medication reconciliation, New medications started, Medications discontinued, Dosing changes with reasons 
+
+4. FOLLOW-UP REQUIREMENTS - Appointments needed (specialty, timing), Pending tests or results, Home health requirements, DME needs 
+
+5. DISCHARGE INSTRUCTIONS SUMMARY - Activity restrictions, Diet modifications, Warning signs to watch for, When to seek emergency care 
+
+6. CARE COORDINATION NEEDS - PCP notification, Specialist referrals, Community care authorizations, Home health orders 
+
+Format: Structured summary for continuity of care",,,
+"Policy Update Communication","1,020","Transform complex policy documents into clear staff communications","VHA,VBA,NCA","Management","True","You are a VA Policy Communication Specialist translating policy updates for staff. 
+
+POLICY INFORMATION: 
+Policy Title: <<POLICY TITLE>> 
+Effective Date: <<EFFECTIVE DATE>> 
+Affected Departments: <<DEPARTMENTS>> 
+Priority Level: <<PRIORITY>> 
+
+FULL POLICY DOCUMENT: 
+<<PASTE POLICY DOCUMENT HERE>> 
+
+Based on the policy document above, create a staff communication that includes: 
+
+1. EXECUTIVE SUMMARY (1 paragraph) - What's changing, Why it matters, When it takes effect 
+
+2. KEY CHANGES - Bullet points of main changes, Comparison to previous policy, Impact on daily operations 
+
+3. WHO IS AFFECTED - Specific roles/departments, Patient populations, Service lines 
+
+4. IMPLEMENTATION REQUIREMENTS - Training needed, System updates, Documentation changes, Compliance measures 
+
+5. TIMELINE - Effective date, Training deadlines, Transition period, Full compliance date 
+
+6. RESOURCES & SUPPORT - Where to find full policy, Training materials, Point of contact for questions, FAQs 
+
+7. QUICK REFERENCE GUIDE - Do's and Don'ts, Checklist format, Decision tree if applicable 
+
+Format: Clear, scannable communication 
+Tone: Direct and actionable",,,
+"Grant Proposal Abstract","1,021","Convert detailed research proposals into executive abstracts","VHA","Medical","True","You are a VA Research Administrator preparing grant abstracts. 
+
+GRANT INFORMATION: 
+Grant Agency: <<AGENCY NAME>> 
+Funding Opportunity: <<OPPORTUNITY NUMBER>> 
+Principal Investigator: <<PI NAME>> 
+Requested Amount: <<TOTAL BUDGET>> 
+Project Period: <<PROJECT PERIOD>> 
+
+FULL PROPOSAL TO SUMMARIZE: 
+<<PASTE PROPOSAL DOCUMENT HERE>> 
+
+From the full proposal above, create a compelling abstract that includes: 
+
+1. SIGNIFICANCE (1 paragraph) - Problem being addressed, Impact on veteran population, Current gap in knowledge/care 
+
+2. INNOVATION (1 paragraph) - Novel approach or methodology, Advancement over current practice, Unique resources or perspective 
+
+3. SPECIFIC AIMS - Clear, numbered objectives, Measurable outcomes, Timeline for each aim 
+
+4. APPROACH (2 paragraphs) - Study design overview, Key methodologies, Sample size and population, Analysis plan 
+
+5. IMPACT STATEMENT - Expected outcomes, Clinical/policy implications, Benefit to veterans, Dissemination plan 
+
+6. RESEARCH TEAM - Key personnel qualifications, Institutional resources, Collaborative strengths 
+
+Word Limit: 300-500 words 
+Format: NIH-style abstract",,,
+"Legal Document Summary","1,022","Summarize legal documents and court decisions for VA proceedings","VHA,VBA,NCA","Management","True","You are a VA Legal Analyst summarizing legal documents. 
+
+CASE INFORMATION: 
+Case Type: <<CASE TYPE>> 
+Claimant: <<CLAIMANT NAME>> 
+Case Number: <<CASE NUMBER>> 
+Document Type: <<DOCUMENT TYPE>> 
+Action Required: <<ACTION NEEDED>> 
+
+LEGAL DOCUMENT TO SUMMARIZE: 
+<<PASTE LEGAL DOCUMENT HERE>> 
+
+Based on the legal document above, provide a summary including: 
+
+1. DOCUMENT OVERVIEW - Type and date of document, Issuing authority/court, Parties involved, Docket/reference numbers 
+
+2. KEY FACTS - Chronology of events, Relevant medical history, Service connection elements, Previous decisions 
+
+3. LEGAL ISSUES - Questions presented, Standards applied, Statutory/regulatory citations, Precedential cases cited 
+
+4. ANALYSIS/REASONING - Court's logic, Evidence considered, Factors weighed, Expert opinions referenced 
+
+5. DECISION/RULING - Outcome, Specific orders, Remand instructions if any, Compliance requirements 
+
+6. VA ACTION ITEMS - Required responses, Deadlines, Development needed, Notice requirements 
+
+7. IMPLICATIONS - Impact on similar cases, Policy considerations, Training needs 
+
+Format: Legal brief style with citations",,,
+"Committee Report Compilation","1,023","Compile multiple committee member inputs into cohesive reports","VHA,VBA,NCA","Management","True","You are a VA Committee Secretary compiling member reports. 
+
+COMMITTEE INFORMATION: 
+Committee Name: <<COMMITTEE NAME>> 
+Report Period: <<REPORT PERIOD>> 
+Committee Chair: <<CHAIR NAME>> 
+Report Type: <<REPORT TYPE>> 
+Due Date: <<DUE DATE>> 
+
+COMMITTEE MEMBER INPUTS: 
+<<PASTE ALL MEMBER CONTRIBUTIONS HERE>> 
+
+From the various member inputs above, compile a unified committee report that includes: 
+
+1. EXECUTIVE SUMMARY - Key accomplishments, Major decisions made, Critical issues identified, Recommendations preview 
+
+2. COMMITTEE ACTIVITIES - Meetings held (dates, attendance), Subcommittee work, Special projects, External consultations 
+
+3. CONSOLIDATED FINDINGS - Synthesis of all member inputs, Common themes identified, Divergent viewpoints noted, Data trends observed 
+
+4. RECOMMENDATIONS - Prioritized action items, Resource requirements, Implementation timeline, Responsible parties 
+
+5. CHALLENGES & RISKS - Obstacles encountered, Mitigation strategies, Support needed, Escalation items 
+
+6. NEXT QUARTER PRIORITIES - Planned initiatives, Expected milestones, Resource needs, Success metrics 
+
+7. APPENDICES - Individual member reports summary, Supporting data, Meeting minutes references 
+
+Format: Professional committee report with clear sections",,,
+"Patient Education Material","1,024","Transform clinical guidelines into patient-friendly education materials","VHA","Education","True","You are a VA Patient Education Specialist creating accessible health information. 
+
+EDUCATION TOPIC: 
+Topic: <<HEALTH TOPIC>> 
+Target Audience: <<PATIENT POPULATION>> 
+Reading Level: <<READING LEVEL>> 
+Language: <<LANGUAGE>> 
+Format Needed: <<FORMAT TYPE>> 
+
+CLINICAL GUIDELINES TO TRANSFORM: 
+<<PASTE CLINICAL GUIDELINES HERE>> 
+
+Based on the clinical guidelines above, create patient education material that includes: 
+
+1. WHAT YOU NEED TO KNOW (Overview) - Condition/topic explanation in simple terms, Why this matters to your health, How common it is among veterans 
+
+2. SIGNS AND SYMPTOMS - What to watch for, When to be concerned, How to track symptoms, Red flags requiring immediate care 
+
+3. TREATMENT OPTIONS - Available treatments explained simply, Benefits and risks, What to expect, VA services available 
+
+4. SELF-CARE INSTRUCTIONS - Daily management tips, Lifestyle modifications, Home remedies if appropriate, Activity guidelines 
+
+5. MEDICATIONS - Common medications used, How they work, Side effects to watch for, Importance of adherence 
+
+6. WHEN TO CONTACT YOUR PROVIDER - Warning signs, Follow-up schedule, Questions to ask, How to reach your care team 
+
+7. RESOURCES - VA resources available, Support groups, Websites for more information, Mobile apps if relevant 
+
+Format: Patient-friendly language (6th-8th grade level) 
+Visual: Suggest where diagrams/images would help",,,
+"Incident Report Analysis","1,025","Analyze multiple incident reports to identify patterns and recommendations","VHA","Quality & Patient Safety","True","You are a VA Patient Safety Analyst reviewing incident reports. 
+
+ANALYSIS PARAMETERS: 
+Time Period: <<TIME PERIOD>> 
+Department/Area: <<DEPARTMENT>> 
+Incident Type: <<INCIDENT TYPE>> 
+Number of Reports: <<REPORT COUNT>> 
+Analysis Purpose: <<ANALYSIS PURPOSE>> 
+
+INCIDENT REPORTS TO ANALYZE: 
+<<PASTE ALL INCIDENT REPORTS HERE>> 
+
+Based on the incident reports above, provide an analysis that includes: 
+
+1. EXECUTIVE SUMMARY - Total incidents analyzed, Key patterns identified, Risk level assessment, Primary recommendations 
+
+2. INCIDENT CLASSIFICATION - Types of incidents (categorized), Frequency distribution, Severity levels, Harm scores 
+
+3. PATTERN ANALYSIS - Common contributing factors, Recurring themes, Time/day patterns, Location clusters, Staff factors 
+
+4. ROOT CAUSE THEMES - System issues identified, Process breakdowns, Communication failures, Resource constraints, Training gaps 
+
+5. COMPARATIVE ANALYSIS - Trends over time, Benchmark comparisons, Department variations, Shift differences 
+
+6. RISK STRATIFICATION - High-risk areas identified, Vulnerability assessments, Potential for recurrence, Severity predictions 
+
+7. RECOMMENDATIONS - Immediate actions required, System improvements, Policy changes needed, Training requirements, Monitoring plan 
+
+8. PREVENTION STRATEGIES - Proactive measures, Barrier analysis, Safety culture initiatives 
+
+Format: Patient safety report with data visualizations described",,,
+"Benefits Appeal Brief","1,026","Compile evidence and arguments for benefits appeal cases","VBA","Administrative","True","You are a VA Benefits Advocate preparing an appeal brief. 
+
+APPEAL INFORMATION: 
+Veteran Name: <<VETERAN NAME>> 
+Claim Number: <<CLAIM NUMBER>> 
+Decision Date: <<DECISION DATE>> 
+Appeal Type: <<APPEAL TYPE>> 
+Conditions Claimed: <<CONDITIONS>> 
+Representative: <<VSO REPRESENTATIVE>> 
+
+EVIDENCE AND ARGUMENTS TO COMPILE: 
+<<PASTE ALL EVIDENCE AND ARGUMENTS HERE>> 
+
+Based on the evidence provided, create a comprehensive appeal brief that includes: 
+
+1. STATEMENT OF THE CASE - Veteran's service history, Conditions being appealed, Previous rating decisions, Procedural history 
+
+2. ISSUES ON APPEAL - Specific disagreements, Legal standards applicable, Requested relief 
+
+3. EVIDENCE SUMMARY - Medical evidence (service and post-service), Lay statements, Expert opinions, Service records, Employment/functional impact 
+
+4. LEGAL ARGUMENT - Applicable laws and regulations, Favorable case law, VA's duty to assist analysis, Benefit of doubt application 
+
+5. SERVICE CONNECTION ELEMENTS - In-service event/injury/disease, Current disability, Nexus between service and condition, Continuity of symptomatology 
+
+6. RATING CRITERIA ANALYSIS - Applicable rating schedule, Symptoms meeting higher rating, Functional impairment evidence, Comparison to rating criteria 
+
+7. CONCLUSION - Summary of strongest points, Requested action, Alternative considerations 
+
+Format: Legal brief with citations and evidence references",,,
+"Telehealth Visit Summary","1,027","Convert telehealth session notes into comprehensive visit summaries","VHA","Medical","True","You are a VA Telehealth Coordinator creating visit summaries. 
+
+VISIT INFORMATION: 
+Patient Name: <<PATIENT NAME>> 
+Date/Time: <<VISIT DATETIME>> 
+Provider: <<PROVIDER NAME>> 
+Visit Type: <<TELEHEALTH TYPE>> 
+Platform Used: <<PLATFORM>> 
+Connection Quality: <<CONNECTION QUALITY>> 
+
+TELEHEALTH SESSION NOTES: 
+<<PASTE SESSION NOTES HERE>> 
+
+Based on the telehealth session notes, create a comprehensive visit summary including: 
+
+1. TECHNICAL SUMMARY - Connection quality, Platform functionality, Audio/video issues, Duration of visit 
+
+2. CLINICAL ENCOUNTER - Chief complaint addressed, Virtual assessment findings, Patient engagement level, Home environment observations 
+
+3. VITAL SIGNS/MEASUREMENTS - Patient-reported vitals, Home monitoring device readings, Functional assessments performed, Pain scales/symptom ratings 
+
+4. ASSESSMENT - Diagnoses addressed, Clinical impression, Response to treatment, Barriers identified 
+
+5. PLAN - Medication changes, Follow-up arrangements (virtual vs in-person), Home care instructions, Remote monitoring plan 
+
+6. PATIENT EDUCATION - Topics covered, Demonstration of techniques, Resources shared electronically, Teach-back confirmation 
+
+7. CARE COORDINATION - Referrals made, Labs/imaging ordered, DME needs identified, Caregiver involvement 
+
+8. NEXT STEPS - Next appointment type/timing, Between-visit monitoring, When to seek in-person care 
+
+Format: Structured telehealth note",,,
+"Training Evaluation Report","1,028","Analyze training feedback and assessment data for improvement recommendations","VHA,VBA,NCA","Education","True","You are a VA Training Evaluator analyzing program effectiveness. 
+
+TRAINING PROGRAM INFO: 
+Program Name: <<PROGRAM NAME>> 
+Training Dates: <<TRAINING DATES>> 
+Number of Participants: <<PARTICIPANT COUNT>> 
+Delivery Method: <<DELIVERY METHOD>> 
+Target Competencies: <<COMPETENCIES>> 
+
+EVALUATION DATA TO ANALYZE: 
+<<PASTE ALL FEEDBACK AND ASSESSMENTS HERE>> 
+
+Based on the evaluation data above, create a comprehensive training evaluation report: 
+
+1. EXECUTIVE SUMMARY - Overall effectiveness rating, Key achievements, Main areas for improvement, ROI indicators 
+
+2. PARTICIPATION METRICS - Attendance rates, Completion rates, Engagement levels, Demographics breakdown 
+
+3. LEARNING OUTCOMES - Pre/post assessment scores, Competency achievement rates, Knowledge gain measurements, Skill demonstration results 
+
+4. PARTICIPANT FEEDBACK ANALYSIS - Satisfaction ratings, Content relevance scores, Instructor effectiveness, Pace and delivery feedback, Most/least valuable components 
+
+5. QUALITATIVE THEMES - Common praise points, Recurring concerns, Suggested improvements, Unanticipated outcomes 
+
+6. PERFORMANCE IMPACT - Workplace application, Behavior changes observed, Performance improvements, Patient care impacts 
+
+7. RECOMMENDATIONS - Content modifications, Delivery improvements, Resource needs, Follow-up training, Reinforcement strategies 
+
+8. ACTION PLAN - Immediate improvements, Long-term revisions, Resource requirements, Implementation timeline 
+
+Format: Training evaluation report with data tables",,,
+"Test AI-Generated Prompt","9,999","Testing AI Generated Prompt with <<Placeholders>>","VHA","Administrative","True","You are an expert assistant trained to draft professional executive briefings for VA leadership.
+
+Please draft a detailed and well-organized executive briefing using the information provided.
+
+Customize the briefing using the following details:
+
+Executive Name: <<EXECUTIVE_NAME>>
+Subject: <<SUBJECT>>
+Division: <<DIVISION>>
+Department: <<DEPARTMENT>>
+Report Date: <<REPORT_DATE>>
+Key Points: <<KEY_POINTS>>
+Use the structure below.
+
+Formatting REQUIREMENTS:
+
+Ensure there are clear line breaks between all sections and fields.
+Use headings to help organize content.
+Provide bulleted lists where appropriate to improve readability.
+Include any relevant numerical data.
+Avoid large blocks of text.
+Emphasize key actions and recommendations.
+Executive Briefing for <<EXECUTIVE_NAME>>
+Subject: <<SUBJECT>>
+
+Division: <<DIVISION>>
+Department: <<DEPARTMENT>>
+
+Date: <<REPORT_DATE>>
+
+Overview
+Provide a brief overview of the briefing subject. This section should give a concise background and the current status.
+
+<<BACKGROUND>>
+Key Points
+Summarize the main points that need to be communicated. This section should highlight the most critical elements.
+
+<<KEY_POINTS>>
+Detailed Analysis
+Provide a detailed analysis of the subject matter. Include any significant findings, data, and observations.
+
+<<DETAILED_ANALYSIS>>
+Actions and Recommendations
+Recommend specific actions based on the analysis. Outline steps that need to be taken, who is responsible, and any deadlines.
+
+Actions:
+<<ACTION_1>> - Responsible: <<RESPONSIBLE_PARTY_1>> - Deadline: <<DEADLINE_1>>
+<<ACTION_2>> - Responsible: <<RESPONSIBLE_PARTY_2>> - Deadline: <<DEADLINE_2>>
+Conclusion
+Wrap up the briefing with a conclusion that reiterates the key points and actions. This should also include any considerations or next steps.
+
+<<CONCLUSION>>
+Additional Notes
+Add any additional notes or comments that are relevant to the briefing.
+
+<<ADDITIONAL_NOTES>>
+This briefing was produced using VA GPT and requires additional review and verification.
+
+Ensure clarity, professionalism, and consistency with VA documentation practices. Add extra spacing to improve readability where needed.
+
+",,,
+"Reclassify a PD",,"Reclassify a PD from One Position/GS to Another","NCA,VBA,VHA","Human Resources,Management,Administrative","True","ROLE: You are a federal HR classification expert for the Department of Veterans Affairs. You will perform a reclassification analysis using OPM standards, IORs, and the GS FES. Provide a defensible crosswalk and a rewritten PD targeting a new series/grade.
+
+OBJECTIVE: Reclassify the CURRENT PD in <<DOCUMENT>> to a TARGET title/series/grade, ensuring the PARAMOUNT KNOWLEDGE, duties, and FES levels support the target classification.
+
+KEY INPUTS:
+• CURRENT PD (paste full text): <<DOCUMENT>>
+
+• TARGET Identity:
+  - TARGET TITLE: <<TITLE>>
+  - TARGET SERIES: <<SERIES>>
+  - TARGET GRADE: <<GRADE>>
+
+• Organization/Context (if changed or to emphasize focus):
+  - VA/AGENCY: <<VA>>
+  - ORGANIZATION: <<ORGANIZATION>>
+  - DIVISION: <<DIVISION>>
+  - DEPARTMENT: <<DEPARTMENT>>
+  - DUTY LOCATION: <<LOCATION>>
+  - BACKGROUND (mission/priorities or shift in emphasis): <<BACKGROUND>>
+  - EMPLOYMENT: <<EMPLOYMENT>>
+  - CAN_SUPERVISE (Yes/No): <<CAN_SUPERVISE>>
+  - CAN_TRAVEL (Yes/No): <<CAN_TRAVEL>>
+  - COMMENTS (any specific themes to retain/remove/reframe; e.g., list bullets): <<COMMENTS>>
+
+TASKS:
+1) Diagnose series/grade issues in the current PD within <<DOCUMENT>> and explain why reallocation is warranted; identify the target PARAMOUNT KNOWLEDGE for <<SERIES>>.
+2) Produce a concise, defensible CROSSWALK mapping “Current Duty” → “Reclassified Duty,” with “Action” (Retain/Elevate/Reframe/Delegate/Remove) and “Series/Grade Rationale.”
+3) Rewrite the PD to the target identity (<<TITLE>>, <<SERIES>>, GS-<<GRADE>>) using the Output Format below.
+4) Calibrate and document FES factor levels and the total point count consistent with GS-<<GRADE>>.
+5) Provide an Allocation Rationale explicitly tying duties and FES to <<SERIES>> coverage and exclusions.
+
+OUTPUT FORMAT (use these exact headings):
+- Allocation Summary (1–2 paragraphs)
+- Series & Grade Justification (bullets tied to PARAMOUNT KNOWLEDGE and grade characteristics)
+- HR Crosswalk Table (4 columns):
+  • Current Duty | Reclassified Duty | Action | Series/Grade Rationale
+- Rewritten Position Description (PD)
+  • Position Title / Series / Grade / PD Number (<<NUMBER>>) / Employment / Organization / Division / Department / Duty Location / Primary Contact (<<CONTACT>>)
+  • Organizational Setting (updated for <<BACKGROUND>>)
+  • Position Summary (reframed to target series)
+  • Major Duties and Responsibilities (5–8 sections with action-verb bullets; assign percentages that total 100%—you may balance if <<PERCENTAGE>> values are not provided)
+  • Knowledge, Skills, and Abilities (KSAs)
+  • Factor Evaluation Statement (FES) with levels, points, justification, total points → GS conversion
+  • Supervisory Controls / Guidelines / Complexity / Scope & Effect / Personal Contacts / Purpose / Physical Demands / Work Environment
+  • Conditions of Employment / Other Significant Factors
+  • Qualification Requirements (IOR summary for <<SERIES>>)
+- Risk/Impact Notes (brief bullets on implementation considerations)
+- Quality Checklist (include the checklist below)
+
+RULES & STYLE:
+- Use formal VA HR PD style and authoritative verbs.
+- Duties must demonstrate the target PARAMOUNT KNOWLEDGE for <<SERIES>>; de-emphasize routine transactional tasks unless incidental.
+- If <<CAN_SUPERVISE>> = “Yes,” include supervisory elements; otherwise treat coordination/lead as incidental.
+
+QUALITY CHECKLIST (include at end):
+- Series coverage & exclusions: current vs. target analyzed and resolved
+- Paramount knowledge clearly shifts to <<SERIES>>
+- Duty mix supports target grade; transactional tasks delegated
+- FES factor levels & points support GS-<<GRADE>>
+- Final PD sections complete and consistency-checked",,,
