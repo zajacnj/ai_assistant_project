@@ -13,6 +13,7 @@ from PIL import Image
 import os
 import textwrap
 import streamlit.components.v1 as components
+from urllib.parse import urlencode
 
 # Configure page
 st.set_page_config(
@@ -669,6 +670,14 @@ css_template = """
         background-color: var(--va-gray-lightest);
         border-radius: 8px;
         flex-shrink: 0;
+    }}
+
+    /* active filter item */
+    .division-btn.active, .category-btn.active {{
+        background: var(--va-light-blue);
+        border-color: var(--va-blue);
+        color: var(--va-navy);
+        font-weight: 700;
     }}
 
     /* Specific icon classes with base64 images */
@@ -1416,55 +1425,231 @@ def show_help_page():
     components_html_with_css(help_html, height=900, scrolling=True)
 
 def show_main_interface():
-    """Main interface for the app after title and notice pages"""
+    """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
 
-    st.header("VA AI Assistant - Task Management")
+    def _safe_list(df, col, default_list):
+        try:
+            if isinstance(df, pd.DataFrame) and col in df.columns:
+                vals = [v for v in df[col].dropna().astype(str).tolist() if v]
+                return sorted(list(dict.fromkeys(vals))) or default_list
+        except Exception:
+            pass
+        return default_list
 
-    # Division and category filters
-    col1, col2 = st.columns([2, 3])
-    with col1:
-        division_filter = st.selectbox(
-            "Select Division",
-            options=["All"] + load_divisions()["division_name"].tolist(),
-            index=0,
-            key="division_filter_main"
-        )
-    with col2:
-        category_filter = st.selectbox(
-            "Select Category",
-            options=["All"] + load_categories()["category_name"].tolist(),
-            index=0,
-            key="category_filter_main"
-        )
+    # Load filters with safe fallbacks
+    divisions_df = load_divisions()
+    categories_df = load_categories()
+    divisions = ["VHA", "VBA", "NCA"]
+    categories = [
+        "Administrative","Education","Finance","Human Resources","IT",
+        "Management","Medical","Public Affairs","Quality & Patient Safety","Service Recovery"
+    ]
+    divisions = _safe_list(divisions_df, "division_name", divisions)
+    categories = _safe_list(categories_df, "category_name", categories)
 
-    # Task search and favorite toggle
-    search_term = st.text_input("Search tasks")
-    show_favorites = st.checkbox("Show favorites only", False, key="show_favorites_main")
+    # Read query params to allow link-based navigation
+    try:
+        _qp = st.query_params
+    except Exception:
+        _qp = {}
+    qp_div = _get_qp(_qp, "div") or "All"
+    qp_cat = _get_qp(_qp, "cat") or "All"
+    qp_q = _get_qp(_qp, "q") or ""
+    qp_fav = _get_qp(_qp, "fav") or "0"
+    qp_mine = _get_qp(_qp, "mine") or "0"
+    qp_fav_toggle = _get_qp(_qp, "favt")
+    qp_task = _get_qp(_qp, "task")
 
-    # Legacy selection UI removed in favor of onboarding screen
-    tasks = load_tasks(division=division_filter, category=category_filter, search_term=search_term, show_favorites=show_favorites)
-    if not tasks.empty:
-        st.subheader("Task List")
-        for _, task in tasks.iterrows():
-            # Task card with expandable details
-            with st.expander(task["title"], expanded=False):
-                st.markdown(f"**Description:** {task['task_description']}")
-                st.markdown(f"**Division:** {task['division']}")
-                st.markdown(f"**Category:** {task['category']}")
-                st.markdown(f"**Created on:** {task['created_at']}")
-                st.markdown(f"**Due date:** {task['due_date']}")
-                st.markdown(f"**Status:** {task['status']}")
-                st.markdown(f"**Priority:** {task['priority']}")
-                st.markdown(f"**Tags:** {task['tags']}")
-                st.markdown(f"**AI Suggestions:** {task['ai_suggestions']}")
-                st.markdown(f"**References:** {task['references']}")
-                st.markdown(f"**Favorites:** {task['is_favorite']}")
-    else:
-        st.markdown("No tasks found matching the criteria.")
+    # Optional: toggle favorite via query param (favt=task_id)
+    def _toggle_favorite(task_id: str):
+        conn = get_database_connection()
+        if not conn:
+            return
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT is_favorite FROM tasks WHERE task_id = ?", (task_id,))
+            row = cur.fetchone()
+            if row is None:
+                return
+            new_val = 0 if int(row[0] or 0) else 1
+            cur.execute("UPDATE tasks SET is_favorite = ? WHERE task_id = ?", (new_val, task_id))
+            conn.commit()
+        except Exception:
+            pass
+        finally:
+            conn.close()
 
-    # Debug: Show raw tasks data
-    if st.checkbox("Show raw tasks data", False):
-        st.write(tasks)
+    if qp_fav_toggle:
+        _toggle_favorite(qp_fav_toggle)
+        try:
+            # remove favt from URL and rerun to reflect new state
+            upd = {
+                "page": "main",
+                "div": qp_div,
+                "cat": qp_cat,
+                "q": qp_q,
+                "fav": qp_fav,
+                "mine": qp_mine,
+            }
+            st.query_params.update(upd)
+        except Exception:
+            pass
+        st.rerun()
+
+    # Layout: left filter rail (HTML buttons), right content
+    rail, main = st.columns([1, 4])
+    with rail:
+        st.markdown("### Division")
+        items = [
+            ("All", ""),
+            ("VHA", "vha-icon"),
+            ("VBA", "vba-icon"),
+            ("NCA", "nca-icon"),
+        ]
+        div_html = []
+        for label, icon_cls in items:
+            active = " active" if (qp_div == label) else ""
+            href = f"?page=main&div={label}&cat={qp_cat}"
+            icon = f"<div class='btn-icon {icon_cls}'></div>" if icon_cls else "<div class='btn-icon'></div>"
+            div_html.append(f"<a class='division-btn{active}' href='{href}'>{icon}<span>{label}</span></a>")
+        st.markdown("\n".join(div_html), unsafe_allow_html=True)
+
+        st.markdown("### Category")
+        cat_map = [
+            ("All", ""),
+            ("Administrative", "administrative-icon"),
+            ("Education", "education-icon"),
+            ("Finance", "finance-icon"),
+            ("Human Resources", "hr-icon"),
+            ("IT", "it-icon"),
+            ("Management", "management-icon"),
+            ("Medical", "medical-icon"),
+            ("Public Affairs", ""),
+            ("Quality & Patient Safety", "qps-icon"),
+            ("Service Recovery", ""),
+        ]
+        cat_html = []
+        for label, icon_cls in cat_map:
+            active = " active" if (qp_cat == label) else ""
+            href = f"?page=main&div={qp_div}&cat={label}"
+            icon = f"<div class='btn-icon {icon_cls}'></div>" if icon_cls else "<div class='btn-icon'></div>"
+            cat_html.append(f"<a class='category-btn{active}' href='{href}'>{icon}<span>{label}</span></a>")
+        st.markdown("\n".join(cat_html), unsafe_allow_html=True)
+
+    with main:
+        top = st.columns([4, 1, 1, 1])
+        with top[0]:
+            search_term = st.text_input("Search tasks and prompts...", value=qp_q, key="task_search_main")
+        with top[1]:
+            show_favorites = st.toggle("Favorites", value=(qp_fav == "1"), key="fav_toggle")
+        with top[2]:
+            my_tasks = st.toggle("My Tasks", value=(qp_mine == "1"), key="mine_toggle")
+        with top[3]:
+            if st.button("+ Create Task"):
+                st.session_state.current_page = "edit_task"
+                st.rerun()
+
+        # keep URL in sync with current controls
+        try:
+            st.query_params.update({
+                "page": "main",
+                "div": qp_div,
+                "cat": qp_cat,
+                "q": search_term or "",
+                "fav": "1" if show_favorites else "0",
+                "mine": "1" if my_tasks else "0",
+            })
+        except Exception:
+            pass
+
+        # Fetch tasks safely
+        tasks = load_tasks(division=qp_div, category=qp_cat, search_term=search_term, show_favorites=show_favorites)
+        if tasks is None or not isinstance(tasks, pd.DataFrame) or tasks.empty:
+            # Provide a few sample cards when DB has no rows
+            tasks = pd.DataFrame([
+                {"title":"Meeting Minutes","task_description":"Create meeting minutes from a transcript","division":"Administrative","category":"Management","is_favorite":1},
+                {"title":"Ambient Dictation","task_description":"Generate outpatient clinic notes from a transcript","division":"Medical","category":"Documentation","is_favorite":0},
+                {"title":"Market Pay Review","task_description":"Comprehensive market pay review summary","division":"Human Resources","category":"Compensation","is_favorite":0},
+                {"title":"Benefits Claim Status","task_description":"Professional letter updating a veteran","division":"Public Affairs","category":"Communication","is_favorite":0},
+            ])
+
+        # Ensure task_id column present for links/toggles
+        if "task_id" not in tasks.columns:
+            tasks = tasks.copy()
+            tasks["task_id"] = [str(i+1) for i in range(len(tasks))]
+
+        # Grid of cards (3 per row)
+        st.markdown("\n")
+        cols = st.columns(3, gap="large")
+        base_params = {
+            "page": "main",
+            "div": qp_div,
+            "cat": qp_cat,
+            "q": search_term or "",
+            "fav": "1" if show_favorites else "0",
+            "mine": "1" if my_tasks else "0",
+        }
+        for i, (_, task) in enumerate(tasks.iterrows()):
+            c = cols[i % 3]
+            with c:
+                tid = str(task.get("task_id", ""))
+                fav_star = '★' if int(task.get('is_favorite',0)) else '☆'
+                fav_href = "?" + urlencode(dict(base_params, favt=tid))
+                details_href = "?" + urlencode(dict(base_params, task=tid))
+                html = f"""
+                <div class='task-card'>
+                  <div class='task-header'>
+                    <h4 class='task-title'><a href='{details_href}' style='text-decoration:none;color:inherit;'>{task.get('title','Untitled')}</a></h4>
+                    <div class='task-favorite'><a href='{fav_href}' title='Toggle favorite' style='text-decoration:none;color:inherit;'>{fav_star}</a></div>
+                  </div>
+                  <div class='task-description'>{task.get('task_description','')}</div>
+                  <div class='task-footer'>
+                    <span class='task-category'>{task.get('category','')}</span>
+                    <span class='task-arrow'><a href='{details_href}' style='text-decoration:none;color:inherit;'>›</a></span>
+                  </div>
+                </div>
+                """
+                st.markdown(html, unsafe_allow_html=True)
+
+        # Optional debug table
+        if st.checkbox("Show raw tasks data", False):
+            st.write(tasks)
+
+        # Details overlay (modal) if a task is requested
+        if qp_task:
+            detail_df = load_tasks(task_id=qp_task)
+            if detail_df is None or detail_df.empty:
+                # try to find from current list
+                try:
+                    detail_df = tasks[tasks["task_id"].astype(str) == str(qp_task)]
+                except Exception:
+                    detail_df = pd.DataFrame()
+            if not detail_df.empty:
+                row = detail_df.iloc[0]
+                close_href = "?" + urlencode(base_params)
+                modal_html = f"""
+                <style>
+                  .va-modal-backdrop{{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1000;}}
+                  .va-modal{{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:min(680px,90vw);background:#fff;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.3);z-index:1001;padding:20px;border:1px solid var(--va-gray-lighter);}}
+                  .va-modal h3{{margin:0 0 8px 0;color:var(--va-navy);}}
+                  .va-modal .meta{{color:var(--va-gray);margin-bottom:10px;}}
+                  .va-modal .body{{color:var(--va-gray);line-height:1.5;}}
+                  .va-modal .actions{{margin-top:16px;display:flex;gap:12px;justify-content:flex-end;}}
+                  .va-btn{{padding:10px 16px;border-radius:10px;text-decoration:none;border:1px solid var(--va-gray-lighter);}}
+                  .va-btn.primary{{background:var(--va-navy);color:#fff;border:none;}}
+                </style>
+                <a class='va-modal-backdrop' href='{close_href}'></a>
+                <div class='va-modal'>
+                  <h3>{row.get('title','Untitled')}</h3>
+                  <div class='meta'>{row.get('division','')} • {row.get('category','')}</div>
+                  <div class='body'>{row.get('task_description','')}</div>
+                  <div class='actions'>
+                    <a class='va-btn' href='{close_href}'>Close</a>
+                    <a class='va-btn primary' href='?page=edit_task&task_id={row.get('task_id','')}' target='_self'>Edit Task</a>
+                  </div>
+                </div>
+                """
+                components_html_with_css(modal_html, height=200, scrolling=False)
 
 def show_edit_task_page():
     """Page to edit an existing task"""
