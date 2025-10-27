@@ -1457,6 +1457,12 @@ def show_main_interface():
     qp_q = _get_qp(_qp, "q") or ""
     qp_fav = _get_qp(_qp, "fav") or "0"
     qp_mine = _get_qp(_qp, "mine") or "0"
+    try:
+        qp_page = int(_get_qp(_qp, "p") or "1")
+        if qp_page < 1:
+            qp_page = 1;
+    except Exception:
+        qp_page = 1
     qp_fav_toggle = _get_qp(_qp, "favt")
     qp_task = _get_qp(_qp, "task")
 
@@ -1558,6 +1564,7 @@ def show_main_interface():
                 "q": search_term or "",
                 "fav": "1" if show_favorites else "0",
                 "mine": "1" if my_tasks else "0",
+                "p": str(qp_page),
             })
         except Exception:
             pass
@@ -1578,6 +1585,16 @@ def show_main_interface():
             tasks = tasks.copy()
             tasks["task_id"] = [str(i+1) for i in range(len(tasks))]
 
+        # Pagination
+        page_size = 9
+        total = len(tasks)
+        total_pages = max(1, (total + page_size - 1) // page_size)
+        if qp_page > total_pages:
+            qp_page = total_pages
+        start = (qp_page - 1) * page_size
+        end = start + page_size
+        page_df = tasks.iloc[start:end]
+
         # Grid of cards (3 per row)
         st.markdown("\n")
         cols = st.columns(3, gap="large")
@@ -1588,8 +1605,9 @@ def show_main_interface():
             "q": search_term or "",
             "fav": "1" if show_favorites else "0",
             "mine": "1" if my_tasks else "0",
+            "p": str(qp_page),
         }
-        for i, (_, task) in enumerate(tasks.iterrows()):
+        for i, (_, task) in enumerate(page_df.iterrows()):
             c = cols[i % 3]
             with c:
                 tid = str(task.get("task_id", ""))
@@ -1599,17 +1617,36 @@ def show_main_interface():
                 html = f"""
                 <div class='task-card'>
                   <div class='task-header'>
-                    <h4 class='task-title'><a href='{details_href}' style='text-decoration:none;color:inherit;'>{task.get('title','Untitled')}</a></h4>
-                    <div class='task-favorite'><a href='{fav_href}' title='Toggle favorite' style='text-decoration:none;color:inherit;'>{fav_star}</a></div>
+                    <h4 class='task-title'><a href='{details_href}' target='_self' style='text-decoration:none;color:inherit;'>{task.get('title','Untitled')}</a></h4>
+                    <div class='task-favorite'><a href='{fav_href}' target='_self' title='Toggle favorite' style='text-decoration:none;color:inherit;'>{fav_star}</a></div>
                   </div>
                   <div class='task-description'>{task.get('task_description','')}</div>
                   <div class='task-footer'>
                     <span class='task-category'>{task.get('category','')}</span>
-                    <span class='task-arrow'><a href='{details_href}' style='text-decoration:none;color:inherit;'>›</a></span>
+                    <span class='task-arrow'><a href='{details_href}' target='_self' style='text-decoration:none;color:inherit;'>›</a></span>
                   </div>
                 </div>
                 """
                 st.markdown(html, unsafe_allow_html=True)
+
+        # Pagination controls
+        nav_cols = st.columns([1,2,1])
+        with nav_cols[0]:
+            if qp_page > 1 and st.button('◀ Prev', use_container_width=True):
+                try:
+                    st.query_params.update(dict(base_params, p=str(qp_page-1)))
+                except Exception:
+                    pass
+                st.rerun()
+        with nav_cols[1]:
+            st.write(f"Page {qp_page} of {total_pages}")
+        with nav_cols[2]:
+            if qp_page < total_pages and st.button('Next ▶', use_container_width=True):
+                try:
+                    st.query_params.update(dict(base_params, p=str(qp_page+1)))
+                except Exception:
+                    pass
+                st.rerun()
 
         # Optional debug table
         if st.checkbox("Show raw tasks data", False):
