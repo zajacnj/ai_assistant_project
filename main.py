@@ -1697,7 +1697,7 @@ def show_main_interface():
                   .va-modal .meta{{color:var(--va-gray);margin-bottom:10px;}}
                   .va-modal .body{{color:var(--va-gray);line-height:1.5;}}
                   .va-modal .grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;color:var(--va-gray);}}
-                  .va-modal .grid div{border:1px solid var(--va-gray-lighter);border-radius:8px;padding:8px;background:var(--va-gray-lightest)}
+                  .va-modal .grid div{{border:1px solid var(--va-gray-lighter);border-radius:8px;padding:8px;background:var(--va-gray-lightest)}}
                   .va-modal .actions{{margin-top:16px;display:flex;gap:12px;justify-content:flex-end;}}
                   .va-btn{{padding:10px 16px;border-radius:10px;text-decoration:none;border:1px solid var(--va-gray-lighter);}}
                   .va-btn.primary{{background:var(--va-navy);color:#fff;border:none;}}
