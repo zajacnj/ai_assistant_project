@@ -741,6 +741,39 @@ except Exception as e:
     css_styles = "<style>html,body{font-family: Arial, sans-serif;}</style>"
     st.markdown(css_styles, unsafe_allow_html=True)
 
+# --- Lightweight API handlers (e.g., AJAX favorite toggle) ---
+def _toggle_favorite_db(task_id: str):
+    if not task_id:
+        return
+    conn = get_database_connection()
+    if not conn:
+        return
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT is_favorite FROM tasks WHERE task_id = ?", (task_id,))
+        row = cur.fetchone()
+        if row is None:
+            return
+        new_val = 0 if int(row[0] or 0) else 1
+        cur.execute("UPDATE tasks SET is_favorite = ? WHERE task_id = ?", (new_val, task_id))
+        conn.commit()
+    except Exception:
+        pass
+    finally:
+        conn.close()
+
+# Handle API calls early and stop rendering to avoid page refresh.
+try:
+    _qp_api = st.query_params
+except Exception:
+    _qp_api = {}
+_api = _get_qp(_qp_api, "api") if ' _get_qp' in globals() else None
+if _api == "favt":
+    _tid = _get_qp(_qp_api, "task") if ' _get_qp' in globals() else None
+    _toggle_favorite_db(_tid)
+    st.write("OK")
+    st.stop()
+
 def components_html_with_css(inner_html: str, height: int = 600, scrolling: bool = True):
     """
     Render HTML inside Streamlit components with the same css_styles injected
@@ -1622,6 +1655,23 @@ def show_main_interface():
 
         # Grid of cards (3 per row)
         st.markdown("\n")
+        # Install JS helper for instant favorite toggle (no full page reload)
+        st.markdown(
+            """
+            <script>
+            window.vaFavToggle = async function(tid, el){
+              try{
+                el.style.opacity = 0.4;
+                await fetch('?api=favt&task=' + encodeURIComponent(tid), {credentials:'same-origin'});
+                el.textContent = (el.textContent.trim() === '★') ? '☆' : '★';
+              }catch(e){ console.warn('toggle fav failed', e); }
+              finally{ el.style.opacity = 1; }
+            };
+            </script>
+            """,
+            unsafe_allow_html=True,
+        )
+
         cols = st.columns(3, gap="large")
         base_params = {
             "page": "main",
@@ -1643,7 +1693,9 @@ def show_main_interface():
                 <div class='task-card'>
                   <div class='task-header'>
                     <h4 class='task-title'><a href='{details_href}' target='_self' style='text-decoration:none;color:inherit;'>{task.get('title','Untitled')}</a></h4>
-                    <div class='task-favorite'><a href='{fav_href}' target='_self' title='Toggle favorite' style='text-decoration:none;color:inherit;'>{fav_star}</a></div>
+                    <div class='task-favorite'>
+                      <a href='{fav_href}' onclick="event.preventDefault(); window.vaFavToggle('{tid}', this);" title='Toggle favorite' style='text-decoration:none;color:inherit;'>{fav_star}</a>
+                    </div>
                   </div>
                   <div class='task-description'>{task.get('task_description','')}</div>
                   <div class='task-footer'>
