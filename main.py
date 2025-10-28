@@ -1276,7 +1276,15 @@ def show_welcome_page():
         } catch (err) { console.warn('explore nav failed', err); }
       });
       var hb = document.getElementById('help-btn');
-      if (hb) hb.addEventListener('click', function(e){ e.preventDefault(); alert('Help & How It Works coming soon.'); });
+      if (hb) hb.addEventListener('click', function(e){
+        try { e.preventDefault(); } catch(_){ }
+        try {
+          var p = new URLSearchParams(window.location.search||'');
+          p.set('page','help');
+          var url='?'+p.toString();
+          window.location.replace(url);
+        } catch (err) { console.warn('help nav failed', err); }
+      });
     })();
     </script>
     """)
@@ -1286,9 +1294,19 @@ def show_welcome_page():
     onboarding_html = (onboarding_html
                        .replace('class="ack-link"', 'class="cta-btn cta-primary"')
                        .replace('class="division-btn"', 'class="cta-btn cta-secondary"')
-                       .replace('Explore Tasks ?', 'Explore Tasks ▶')
-                       .replace('? (__TMPL_COUNT__)', '⚠ (__TMPL_COUNT__)')
+                       .replace('Explore Tasks ▶', 'Explore Tasks ▶')
+                       .replace('__TMPL_COUNT__', '⚠ (__TMPL_COUNT__)')
                       )
+
+    # Ensure final labels are correct
+    try:
+        onboarding_html = (onboarding_html
+                           .replace('Explore Tasks ▶', 'Explore Tasks ▶')
+                           
+                           .replace('⚠ (__TMPL_COUNT__)', '__TMPL_COUNT__')
+                          )
+    except Exception:
+        pass
 
     st.markdown(onboarding_html, unsafe_allow_html=True)
 
@@ -1464,6 +1482,166 @@ def show_help_page():
 })();
 </script>
 """
+
+    # Normalize any stray bell characters and enrich help content
+    try:
+        help_html = help_html.replace('<div class="dot">\a</div>', '<div class="dot">•</div>')
+        # Getting Started: add steps 4-5
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">From the Welcome screen, click <b>Explore Tasks</b> to open the main catalog of AI templates.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Use the division and category filters (left) or the search box to quickly focus the list.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Click any task card to view full details, instructions, and its AI prompt.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">From the Welcome screen, click <b>Explore Tasks</b> to open the main catalog of AI templates.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Use the division and category filters (left) or the search box to quickly focus the list.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Click any task card to view full details, instructions, and its AI prompt.</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Mark frequently used templates with the <b>star</b> icon and filter by <b>Favorites</b>.</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt">Open <b>Help</b> anytime from the header to learn features or troubleshoot.</div></div>
+      </div>
+""",
+        )
+
+        # Navigation: swap bullets and add pagination + task cards notes
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Top Bar</b>: Use the header to return Home or open Help.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Filters</b>: Division and Category buttons refine the visible tasks.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Search</b>: Type key words (e.g., "summary", "report") to find matching templates.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Top Bar</b>: Use the header to return Home or open Help.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Filters</b>: Division and Category buttons refine the visible tasks.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Search</b>: Type key words (e.g., "summary", "report") to find matching templates.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Pagination</b>: Use <i>Prev</i>/<i>Next</i> and the page indicator to browse more results.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Task Cards</b>: Click a card title to open details; use the star to favorite.</div></div>
+      </div>
+""",
+        )
+
+        # Finding Tasks: add combination/reset tips
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">Browse by <b>Division</b> (e.g., Clinical, Administrative) to narrow context.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Pick a <b>Category</b> (e.g., Documentation, Communication) for specific workflows.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Use <b>Search</b> for quick discovery across all tasks.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">Browse by <b>Division</b> (e.g., Clinical, Administrative) to narrow context.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Pick a <b>Category</b> (e.g., Documentation, Communication) for specific workflows.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Use <b>Search</b> for quick discovery across all tasks.</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Combine filters + search to pinpoint exactly what you need.</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt">To reset, set Division to <b>All</b> and clear the search box.</div></div>
+      </div>
+""",
+        )
+
+        # Creating Tasks: expand details fields
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">Open a template and click <b>Create/Edit</b> to add or refine its content.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Provide a descriptive <b>Title</b>, <b>Description</b>, and assign a Division/Category.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Save the task and it becomes available in the catalog with your settings.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">Open a template and click <b>Create/Edit</b> to add or refine its content.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Provide a descriptive <b>Title</b>, <b>Description</b>, and assign a Division/Category.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Use <b>Due date</b>, <b>Priority</b>, <b>Tags</b>, and <b>References</b> to keep work organized.</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Click <b>Save</b>. Your task appears in the catalog with your selections.</div></div>
+      </div>
+""",
+        )
+
+        # Customizing Prompts: expand bullets and add privacy/examples
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">•</div><div class="txt">Start from a curated prompt and tailor <b>patient details</b>, <b>context</b>, and <b>tone</b>.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Use placeholders like <code>[DATE]</code>, <code>[UNIT]</code>, <code>[GOAL]</code> to keep prompts reusable.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Preview output, then iterate to improve clarity or reduce length.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">•</div><div class="txt">Start from a curated prompt and tailor <b>patient details</b>, <b>context</b>, and <b>tone</b>.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Use placeholders like <code>[DATE]</code>, <code>[UNIT]</code>, <code>[GOAL]</code> to keep prompts reusable.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Preview output, then iterate to improve clarity or reduce length.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Privacy</b>: Do not include PHI/PII unless authorized and required.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Examples</b>: Provide short, concrete examples to guide tone and structure.</div></div>
+      </div>
+""",
+        )
+
+        # Using Favorites: add more steps and clarify star
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">Click the <b>?</b> icon on any task to mark it as a favorite.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Filter the catalog by <b>Favorites</b> to see only starred items.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">Click the <b>star</b> icon on any task to mark it as a favorite.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Use the <b>Favorites</b> toggle to view only your starred items.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Star/unstar from the task card or details page; changes apply instantly.</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Favorites help you build a quick-access list across divisions and categories.</div></div>
+      </div>
+""",
+        )
+
+        # Best Practices: add concise tip
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Verify</b> all AI-assisted content for accuracy and relevance before use.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Customize</b> prompts to reflect site-specific or case-specific details.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Comply</b> with VA policies and documentation standards at all times.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Verify</b> all AI-assisted content for accuracy and relevance before use.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Customize</b> prompts to reflect site-specific or case-specific details.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Comply</b> with VA policies and documentation standards at all times.</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Be concise</b>: Short, clear inputs yield better results than long, multi-topic prompts.</div></div>
+      </div>
+""",
+        )
+
+        # Troubleshooting: add empty catalog note
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>No results?</b> Clear filters, broaden your search, or switch divisions.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Styling issues?</b> Refresh the browser or clear cache to reload app CSS.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Navigation not advancing?</b> Ensure you acknowledged the notice and avoid blocking popups or scripts.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>No results?</b> Clear filters, broaden your search, or switch divisions.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Styling issues?</b> Refresh the browser or clear cache to reload app CSS.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Navigation not advancing?</b> Ensure you acknowledged the notice and avoid blocking popups or scripts.</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Empty catalog?</b> If the database is unavailable, sample cards appear—try again later or contact support.</div></div>
+      </div>
+""",
+        )
+    except Exception:
+        pass
 
     # Render via components to avoid Markdown code-block rules on indented HTML
     components_html_with_css(help_html, height=900, scrolling=True)
@@ -1697,6 +1875,7 @@ def show_main_interface():
             c = cols[i % 3]
             with c:
                 tid = str(task.get("task_id", ""))
+                # normalize star glyphs for favorite toggle
                 fav_star = '★' if int(task.get('is_favorite',0)) else '☆'
                 fav_href = "?" + urlencode(dict(base_params, favt=tid))
                 details_href = "?" + urlencode(dict(base_params, page="task", task=tid))
@@ -1715,6 +1894,11 @@ def show_main_interface():
                   </div>
                 </div>
                 """
+                # Polish: nicer chevron for task link
+                try:
+                    html = html.replace("color:inherit;'>></a>", "color:inherit;'>›</a>")
+                except Exception:
+                    pass
                 st.markdown(html, unsafe_allow_html=True)
 
         # Pagination controls
@@ -1942,6 +2126,15 @@ elif st.session_state.current_page == "task":
     show_task_page()
 elif st.session_state.current_page == "edit_task":
     show_edit_task_page()
+
+
+
+
+
+
+
+
+
 
 
 
