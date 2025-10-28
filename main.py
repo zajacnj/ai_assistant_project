@@ -868,7 +868,7 @@ try:
 except Exception:
     qp = {}
 requested_page = _get_qp(qp, "page") if qp else None
-_allowed_pages = {"title", "notice", "welcome", "main", "edit_task", "help"}
+_allowed_pages = {"title", "notice", "welcome", "main", "edit_task", "help", "task"}
 if requested_page in _allowed_pages:
     # Always allow query-param driven navigation to override session_state on reloads
     st.session_state.current_page = requested_page
@@ -1571,6 +1571,31 @@ def show_main_interface():
 
         # Fetch tasks safely
         tasks = load_tasks(division=qp_div, category=qp_cat, search_term=search_term, show_favorites=show_favorites)
+        # Additional client-side filters (robust to missing columns)
+        try:
+            if search_term:
+                needle = str(search_term).lower()
+                def _match_row(r):
+                    t = str(r.get('title','')).lower()
+                    d = str(r.get('task_description','')).lower()
+                    return (needle in t) or (needle in d)
+                tasks = tasks[tasks.apply(_match_row, axis=1)] if isinstance(tasks, pd.DataFrame) else tasks
+        except Exception:
+            pass
+        try:
+            if show_favorites and isinstance(tasks, pd.DataFrame) and 'is_favorite' in tasks.columns:
+                tasks = tasks[tasks['is_favorite'].fillna(0).astype(int) == 1]
+        except Exception:
+            pass
+        try:
+            if my_tasks and isinstance(tasks, pd.DataFrame):
+                # Filter by 'created_by' or 'owner' if present. If not, keep as-is.
+                for owner_col in ('created_by','owner','user'):
+                    if owner_col in tasks.columns and 'current_user' in st.session_state:
+                        tasks = tasks[tasks[owner_col].astype(str) == str(st.session_state['current_user'])]
+                        break
+        except Exception:
+            pass
         if tasks is None or not isinstance(tasks, pd.DataFrame) or tasks.empty:
             # Provide a few sample cards when DB has no rows
             tasks = pd.DataFrame([
@@ -1613,7 +1638,7 @@ def show_main_interface():
                 tid = str(task.get("task_id", ""))
                 fav_star = '★' if int(task.get('is_favorite',0)) else '☆'
                 fav_href = "?" + urlencode(dict(base_params, favt=tid))
-                details_href = "?" + urlencode(dict(base_params, task=tid))
+                details_href = "?" + urlencode(dict(base_params, page="task", task=tid))
                 html = f"""
                 <div class='task-card'>
                   <div class='task-header'>
@@ -1671,6 +1696,8 @@ def show_main_interface():
                   .va-modal h3{{margin:0 0 8px 0;color:var(--va-navy);}}
                   .va-modal .meta{{color:var(--va-gray);margin-bottom:10px;}}
                   .va-modal .body{{color:var(--va-gray);line-height:1.5;}}
+                  .va-modal .grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;color:var(--va-gray);}}
+                  .va-modal .grid div{border:1px solid var(--va-gray-lighter);border-radius:8px;padding:8px;background:var(--va-gray-lightest)}
                   .va-modal .actions{{margin-top:16px;display:flex;gap:12px;justify-content:flex-end;}}
                   .va-btn{{padding:10px 16px;border-radius:10px;text-decoration:none;border:1px solid var(--va-gray-lighter);}}
                   .va-btn.primary{{background:var(--va-navy);color:#fff;border:none;}}
@@ -1680,6 +1707,11 @@ def show_main_interface():
                   <h3>{row.get('title','Untitled')}</h3>
                   <div class='meta'>{row.get('division','')} • {row.get('category','')}</div>
                   <div class='body'>{row.get('task_description','')}</div>
+                  <div class='grid'>
+                    <div><b>Priority:</b> {row.get('priority','')}</div>
+                    <div><b>Due:</b> {row.get('due_date','')}</div>
+                    <div style='grid-column:1 / -1'><b>Tags:</b> {row.get('tags','')}</div>
+                  </div>
                   <div class='actions'>
                     <a class='va-btn' href='{close_href}'>Close</a>
                     <a class='va-btn primary' href='?page=edit_task&task_id={row.get('task_id','')}' target='_self'>Edit Task</a>
@@ -1688,10 +1720,83 @@ def show_main_interface():
                 """
                 components_html_with_css(modal_html, height=200, scrolling=False)
 
+def show_task_page():
+    """Dedicated task details page with actions (opened from the grid)."""
+    try:
+        _qp = st.query_params
+    except Exception:
+        _qp = {}
+    qp_task = _get_qp(_qp, "task")
+    if not qp_task:
+        st.error("No task specified")
+        return
+
+    # Build a back link preserving filters
+    back_params = {
+        "page": "main",
+        "div": _get_qp(_qp, "div") or "All",
+        "cat": _get_qp(_qp, "cat") or "All",
+        "q": _get_qp(_qp, "q") or "",
+        "fav": _get_qp(_qp, "fav") or "0",
+        "mine": _get_qp(_qp, "mine") or "0",
+        "p": _get_qp(_qp, "p") or "1",
+    }
+    back_href = "?" + urlencode(back_params)
+
+    # Load task
+    df = load_tasks(task_id=qp_task)
+    if df is None or df.empty:
+        st.markdown('<div class="main-header"><div class="header-logo"><div class="header-logo-icon"></div> <span>Task Details</span></div></div>', unsafe_allow_html=True)
+        st.info("Task not found; it may not exist in the database.")
+        st.markdown(f"<a class='cta-btn cta-secondary' href='{back_href}'>Back to Tasks</a>", unsafe_allow_html=True)
+        return
+    row = df.iloc[0]
+
+    st.markdown('<div class="main-header"><div class="header-logo"><div class="header-logo-icon"></div> <span>Task Details</span></div></div>', unsafe_allow_html=True)
+
+    # Header/meta
+    st.markdown(f"## {row.get('title','Untitled')}")
+    st.markdown(f"{row.get('division','')} • {row.get('category','')}")
+    st.markdown("---")
+
+    # Body
+    st.markdown(f"**Description**\n\n{row.get('task_description','')}")
+    colm = st.columns(2)
+    with colm[0]:
+        st.markdown(f"**Priority:** {row.get('priority','')}")
+    with colm[1]:
+        st.markdown(f"**Due date:** {row.get('due_date','')}")
+    st.markdown(f"**Tags:** {row.get('tags','')}")
+
+    # Actions
+    act1, act2, act3 = st.columns([1,1,2])
+    with act1:
+        with st.form("fav_form"):
+            fav_val = int(row.get('is_favorite',0))
+            new_val = not bool(fav_val)
+            st.form_submit_button("★ Favorite" if not fav_val else "☆ Unfavorite")
+            if st.session_state.get('fav_form') is not None:
+                pass
+        # Update favorite on submit (workaround: use a separate button)
+        if st.button("Toggle Favorite"):
+            conn = get_database_connection()
+            if conn:
+                try:
+                    conn.execute("UPDATE tasks SET is_favorite = ? WHERE task_id = ?", (1 if not fav_val else 0, row.get('task_id')))
+                    conn.commit()
+                except Exception:
+                    pass
+                finally:
+                    conn.close()
+            st.rerun()
+    with act2:
+        st.markdown(f"<a class='cta-btn cta-primary' href='?page=edit_task&task_id={row.get('task_id','')}' target='_self'>Edit Task</a>", unsafe_allow_html=True)
+    with act3:
+        st.markdown(f"<a class='cta-btn cta-secondary' href='{back_href}'>Back to Tasks</a>", unsafe_allow_html=True)
+
 def show_edit_task_page():
     """Page to edit an existing task"""
-
-    st.header("Edit Task")
+    st.markdown('<div class="main-header"><div class="header-logo"><div class="header-logo-icon"></div> <span>Edit Task</span></div><div></div><div></div></div>', unsafe_allow_html=True)
 
     # Load divisions and categories for dropdowns
     divisions = load_divisions()
@@ -1717,9 +1822,25 @@ def show_edit_task_page():
         st.text_input("Task ID", value=str(task["task_id"]), disabled=True)
         title = st.text_input("Title", value=task["title"])
         description = st.text_area("Description", value=task["task_description"])
-        division = st.selectbox("Division", options=divisions["division_name"].tolist(), index=divisions.index[divisions["division_name"] == task["division"]][0])
-        category = st.selectbox("Category", options=categories["category_name"].tolist(), index=categories.index[categories["category_name"] == task["category"]][0])
-        due_date = st.date_input("Due date", value=datetime.strptime(task["due_date"], "%Y-%m-%d").date())
+        try:
+            div_opts = divisions["division_name"].tolist()
+            div_idx = divisions.index[divisions["division_name"] == task.get("division","")][0] if not divisions.empty else 0
+        except Exception:
+            div_opts, div_idx = ["VHA","VBA","NCA"], 0
+        division = st.selectbox("Division", options=div_opts, index=min(div_idx, max(0,len(div_opts)-1)))
+
+        try:
+            cat_opts = categories["category_name"].tolist()
+            cat_idx = categories.index[categories["category_name"] == task.get("category","")][0] if not categories.empty else 0
+        except Exception:
+            cat_opts, cat_idx = ["Administrative","Medical","IT"], 0
+        category = st.selectbox("Category", options=cat_opts, index=min(cat_idx, max(0,len(cat_opts)-1)))
+
+        try:
+            due_val = datetime.strptime(task.get("due_date",""), "%Y-%m-%d").date()
+        except Exception:
+            due_val = datetime.utcnow().date()
+        due_date = st.date_input("Due date", value=due_val)
         priority = st.selectbox("Priority", options=["Low", "Medium", "High"], index=["Low", "Medium", "High"].index(task["priority"]))
         tags = st.text_input("Tags", value=task["tags"])
         ai_suggestions = st.text_area("AI Suggestions", value=task["ai_suggestions"])
@@ -1754,6 +1875,8 @@ elif st.session_state.current_page == "help":
     show_help_page()
 elif st.session_state.current_page == "main":
     show_main_interface()
+elif st.session_state.current_page == "task":
+    show_task_page()
 elif st.session_state.current_page == "edit_task":
     show_edit_task_page()
 
