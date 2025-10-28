@@ -762,15 +762,26 @@ def _toggle_favorite_db(task_id: str):
     finally:
         conn.close()
 
+def _qp_get_local(qp_obj, key):
+    """Small local helper so we don't rely on _get_qp being defined yet."""
+    try:
+        val = qp_obj.get(key)
+        if isinstance(val, (list, tuple)):
+            return val[0]
+        return val
+    except Exception:
+        return None
+
 # Handle API calls early and stop rendering to avoid page refresh.
 try:
     _qp_api = st.query_params
 except Exception:
     _qp_api = {}
-_api = _get_qp(_qp_api, "api") if ' _get_qp' in globals() else None
+_api = _qp_get_local(_qp_api, "api")
 if _api == "favt":
-    _tid = _get_qp(_qp_api, "task") if ' _get_qp' in globals() else None
-    _toggle_favorite_db(_tid)
+    _tid = _qp_get_local(_qp_api, "task")
+    if _tid:
+        _toggle_favorite_db(_tid)
     st.write("OK")
     st.stop()
 
