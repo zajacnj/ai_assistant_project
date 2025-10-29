@@ -1,0 +1,10 @@
+[server]
+# Polling works better on network/OneDrive folders where FS events are unreliable
+fileWatcherType = "poll"
+# Reload the app automatically when files change
+runOnSave = true
+headless = true
+
+[browser]
+gatherUsageStats = false
+
