@@ -16,9 +16,11 @@ import streamlit.components.v1 as components
 from urllib.parse import urlencode
 
 # Configure page
+_page_icon_path = "ai_assistant/images/VA Seal.png"
+_page_icon = _page_icon_path if os.path.exists(_page_icon_path) else "🦅"
 st.set_page_config(
     page_title="VA AI Assistant",
-    page_icon="🏛️",
+    page_icon=_page_icon,
     layout="wide",
     initial_sidebar_state="collapsed"
 )
