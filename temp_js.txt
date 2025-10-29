@@ -1,0 +1,80 @@
+  const sections = Array.from(document.querySelectorAll('.help-section'));
+  const links = Array.from(document.querySelectorAll('.help-nav a'));
+
+  function setActive(id){
+    links.forEach(a => {
+      const target = (a.getAttribute('href')||'').replace(/^.*#/, '');
+      a.classList.toggle('active', !!id && target === id);
+    });
+  }
+
+  function showOnly(id){
+    sections.forEach(sec => { sec.style.display = (!id || sec.id === id) ? '' : 'none'; });
+    setActive(id);
+  }
+
+  function applyFromHash(){
+    const hash = (location.hash || '').replace('#','');
+    const found = sections.some(s => s.id === hash);
+    const id = found ? hash : 'help-start';
+    showOnly(id);
+  }
+
+  function filterHelp(q){
+    const term = (q||'').trim().toLowerCase();
+    if (term){
+      sections.forEach(sec => {
+        const text = sec.textContent.toLowerCase();
+        sec.style.display = text.includes(term) ? '' : 'none';
+      });
+      setActive(null);
+    } else {
+      applyFromHash();
+    }
+  }
+
+  links.forEach(a => {
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      const id = (this.getAttribute('href')||'').replace(/^.*#/, '');
+      if (input) input.value = '';
+      history.replaceState(null, '', '#' + id);
+      showOnly(id);
+      const cont = document.getElementById('help-content');
+      if (cont){ window.scrollTo({ top: cont.offsetTop - 10, behavior: 'smooth' }); }
+    });
+  });
+
+  if (input){ input.addEventListener('input', e => filterHelp(e.target.value)); }
+  window.addEventListener('hashchange', applyFromHash);
+  applyFromHash();
+})();
+</script>
+"""
+
+    # Normalize any stray bell characters and enrich help content
+    try:
+        help_html = help_html.replace('<div class="dot">\a</div>', '<div class="dot">•</div>')
+        # Getting Started: add steps 4-5
+        help_html = help_html.replace(
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">From the Welcome screen, click <b>Explore Tasks</b> to open the main catalog of AI templates.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Use the division and category filters (left) or the search box to quickly focus the list.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Click any task card to view full details, instructions, and its AI prompt.</div></div>
+      </div>
+""",
+            """
+      <div class="help-card">
+        <div class="help-step"><div class="dot">1</div><div class="txt">From the Welcome screen, click <b>Explore Tasks</b> to open the main catalog of AI templates.</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Use the division and category filters (left) or the search box to quickly focus the list.</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Click any task card to view full details, instructions, and its AI prompt.</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Mark frequently used templates with the <b>star</b> icon and filter by <b>Favorites</b>.</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt">Open <b>Help</b> anytime from the header to learn features or troubleshoot.</div></div>
+      </div>
+""",
+        )
+
+        # Navigation: swap bullets and add pagination + task cards notes
+        help_html = help_html.replace(
+            """

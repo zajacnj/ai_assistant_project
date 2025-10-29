@@ -1,0 +1,250 @@
+    .task-footer {{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--va-gray-lighter);
+    }}
+
+    .task-category {{
+        background: var(--va-light-blue);
+        color: var(--va-navy);
+        padding: 0.4rem 1rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        text-transform: uppercase;
+    }}
+
+    .task-arrow {{
+        color: var(--va-navy);
+        font-size: 1.2rem;
+    }}
+
+    /* ============ HELP PAGES ============ */
+    .help-page {{
+        min-height: 100vh;
+        margin: 0;
+        padding: 0 1.5rem 2rem 1.5rem;
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+        background: var(--va-gray-lightest);
+    }}
+    .help-sidebar {{
+        position: sticky;
+        top: 0.75rem;
+        align-self: start;
+        background: #fff;
+        border: 1px solid var(--va-gray-lighter);
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        padding: 1rem;
+    }}
+    .help-sidebar h4 {{
+        margin: 0 0 0.5rem 0;
+        color: var(--va-navy);
+        font-weight: 800;
+    }}
+    .help-nav a {{
+        display:block;
+        padding: 8px 10px;
+        margin: 4px 0;
+        border-radius: 8px;
+        color: var(--va-gray);
+        text-decoration: none;
+    }}
+    .help-nav a:hover {{
+        background: var(--va-light-blue);
+        color: var(--va-navy);
+    }}
+    .help-nav a.active {{
+        background: var(--va-light-blue);
+        color: var(--va-navy);
+        font-weight: 700;
+    }}
+    .help-content {{
+        background: #fff;
+        border: 1px solid var(--va-gray-lighter);
+        border-radius: 12px;
+        padding: 1.5rem 1.75rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }}
+    .help-hero {{
+        display:flex; align-items:center; justify-content:space-between;
+        gap: 1rem; margin-bottom: 1rem;
+    }}
+    .help-hero .title {{
+        color: var(--va-navy); font-size: 1.75rem; font-weight: 800;
+    }}
+    .help-card {{
+        background: var(--va-gray-lightest);
+        border: 1px solid var(--va-gray-lighter);
+        border-radius: 12px;
+        padding: 1rem 1.25rem;
+        margin: 0.75rem 0 1rem 0;
+    }}
+    .help-step {{ display:flex; align-items:flex-start; gap: 12px; margin: 8px 0; }}
+    .help-step .dot {{
+        width: 28px; height: 28px; border-radius: 50%;
+        background: var(--va-navy); color:#fff; font-weight:800;
+        display:flex; align-items:center; justify-content:center;
+        box-shadow: 0 4px 10px rgba(17,46,81,0.25);
+        flex-shrink:0;
+    }}
+    .help-step .txt {{ color: var(--va-gray); line-height: 1.5; }}
+
+    /* Help header search */
+    .help-search {{
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }}
+    .help-search input[type="search"] {{
+        width: clamp(240px, 40vw, 520px);
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(255,255,255,0.2);
+        outline: none;
+    }}
+
+    /* CTA buttons (uniform size for Explore/Help) */
+    .cta-btn {{
+        display: inline-block;
+        padding: 12px 22px;
+        border-radius: 12px;
+        font-weight: 700;
+        min-width: 180px;
+        height: 44px;
+        text-align: center;
+        line-height: 20px;
+        text-decoration: none !important;
+        cursor: pointer;
+        user-select: none;
+    }}
+    .cta-primary {{
+        background: var(--va-navy);
+        color: #ffffff !important;
+        box-shadow: 0 8px 20px rgba(17,46,81,0.25);
+    }}
+    .cta-primary:hover {{ filter: brightness(1.05); }}
+    .cta-secondary {{
+        background: #ffffff;
+        color: var(--va-navy) !important;
+        border: 1px solid var(--va-gray-lighter);
+    }}
+    .cta-secondary:hover {{ background: var(--va-light-blue); border-color: var(--va-blue); }}
+
+    /* Division and category button styling */
+    .division-btn, .category-btn {{
+        background: white;
+        border: 1px solid var(--va-gray-lighter);
+        border-radius: 10px;
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-size: 14px;
+        color: var(--va-gray);
+    }}
+
+    .division-btn:hover, .category-btn:hover {{
+        background: var(--va-light-blue);
+        border-color: var(--va-blue);
+        color: var(--va-navy);
+        transform: translateX(2px);
+    }}
+
+    .btn-icon {{
+        width: 35px;
+        height: 35px;
+        background-size: 30px 30px;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: var(--va-gray-lightest);
+        border-radius: 8px;
+        flex-shrink: 0;
+    }}
+
+    /* active filter item */
+    .division-btn.active, .category-btn.active {{
+        background: var(--va-light-blue);
+        border-color: var(--va-blue);
+        color: var(--va-navy);
+        font-weight: 700;
+    }}
+
+    /* Specific icon classes with base64 images */
+    .vha-icon {{ {vha_icon_rule} }}
+    .vba-icon {{ {vba_icon_rule} }}
+    .nca-icon {{ {nca_icon_rule} }}
+    .administrative-icon {{ {admin_icon_rule} }}
+    .education-icon {{ {edu_icon_rule} }}
+    .finance-icon {{ {finance_icon_rule} }}
+    .hr-icon {{ {hr_icon_rule} }}
+    .it-icon {{ {it_icon_rule} }}
+    .management-icon {{ {mgmt_icon_rule} }}
+    .medical-icon {{ {medical_icon_rule} }}
+    .qps-icon {{ {qps_icon_rule} }}
+
+    @media (max-width: 1200px) {{
+        .welcome-page {{
+            flex-direction: column;
+        }}
+        .welcome-left, .welcome-right {{
+            flex: none;
+            min-height: 50vh;
+        }}
+        .notice-grid {{
+            grid-template-columns: 1fr;
+        }}
+    }}
+
+    @media (max-width: 768px) {{
+        .title-main {{ font-size: 2.5rem; }}
+        .welcome-title {{ font-size: 2rem; }}
+        .va-seal {{ width: 250px; height: 250px; }}
+        .notice-container {{ padding: 2rem; margin: 0 1rem; }}
+    }}
+</style>
+"""
+
+# Render final CSS by filling placeholders
+css_styles = css_template.format(
+    va_logo_bg=va_logo_bg,
+    va_seal_bg=va_seal_bg,
+    header_logo_icon_bg=header_logo_icon_bg,
+    vha_icon_rule=vha_icon_rule,
+    vba_icon_rule=vba_icon_rule,
+    nca_icon_rule=nca_icon_rule,
+    admin_icon_rule=admin_icon_rule,
+    edu_icon_rule=edu_icon_rule,
+    finance_icon_rule=finance_icon_rule,
+    hr_icon_rule=hr_icon_rule,
+    it_icon_rule=it_icon_rule,
+    mgmt_icon_rule=mgmt_icon_rule,
+    medical_icon_rule=medical_icon_rule,
+    qps_icon_rule=qps_icon_rule
+)
+
+# Inject the CSS into the main Streamlit document so st.markdown(...) HTML uses it
+try:
+    st.markdown(css_styles, unsafe_allow_html=True)
+except Exception as e:
+    st.error(f"Failed to inject global CSS: {e}")
+    css_styles = "<style>html,body{font-family: Arial, sans-serif;}</style>"
+    st.markdown(css_styles, unsafe_allow_html=True)
+
+# --- Lightweight API handlers (e.g., AJAX favorite toggle) ---
+def _toggle_favorite_db(task_id: str):
+    if not task_id:
+        return
+    conn = get_database_connection()
+    if not conn:
+        return

@@ -1,0 +1,250 @@
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT is_favorite FROM tasks WHERE task_id = ?", (task_id,))
+        row = cur.fetchone()
+        if row is None:
+            return
+        new_val = 0 if int(row[0] or 0) else 1
+        cur.execute("UPDATE tasks SET is_favorite = ? WHERE task_id = ?", (new_val, task_id))
+        conn.commit()
+    except Exception:
+        pass
+    finally:
+        conn.close()
+
+def _qp_get_local(qp_obj, key):
+    """Small local helper so we don't rely on _get_qp being defined yet."""
+    try:
+        val = qp_obj.get(key)
+        if isinstance(val, (list, tuple)):
+            return val[0]
+        return val
+    except Exception:
+        return None
+
+# Handle API calls early and stop rendering to avoid page refresh.
+try:
+    _qp_api = st.query_params
+except Exception:
+    _qp_api = {}
+_api = _qp_get_local(_qp_api, "api")
+if _api == "favt":
+    _tid = _qp_get_local(_qp_api, "task")
+    if _tid:
+        _toggle_favorite_db(_tid)
+    st.write("OK")
+    st.stop()
+
+def components_html_with_css(inner_html: str, height: int = 600, scrolling: bool = True):
+    """
+    Render HTML inside Streamlit components with the same css_styles injected
+    so the iframe gets the styling. Fail gracefully and show error output.
+    """
+    full_html = css_styles + "\n" + textwrap.dedent(inner_html)
+    try:
+        return components.html(full_html, height=height, scrolling=scrolling)
+    except Exception as e:
+        st.error(f"components.html failed: {e}")
+        # show the raw HTML as text to help debugging
+        st.code(full_html[:1000] + ("..." if len(full_html) > 1000 else ""), language="html")
+        return None
+
+def get_database_connection():
+    """Connect to the SQLite database"""
+    try:
+        conn = sqlite3.connect('ai_assistant/database/ai_assistant.db')
+        return conn
+    except Exception as e:
+        st.error(f"Database connection error: {e}")
+        return None
+
+def load_divisions():
+    """Load divisions from database"""
+    conn = get_database_connection()
+    if conn:
+        df = pd.read_sql_query("SELECT * FROM divisions WHERE is_active = 1 ORDER BY sort_order", conn)
+        conn.close()
+        return df
+    return pd.DataFrame()
+
+def load_categories(division=None):
+    """Load categories from database"""
+    conn = get_database_connection()
+    if conn:
+        if division and division != "All":
+            df = pd.read_sql_query(
+                "SELECT * FROM categories WHERE is_active = 1 AND division LIKE ? ORDER BY sort_order",
+                conn, params=["%{}%".format(division)]
+            )
+        else:
+            df = pd.read_sql_query("SELECT * FROM categories WHERE is_active = 1 ORDER BY sort_order", conn)
+        conn.close()
+        return df
+    return pd.DataFrame()
+
+def load_tasks(task_id=None, division=None, category=None, search_term="", show_favorites=False, show_user_tasks=False):
+    """Load tasks from database with filters. If task_id is provided, return that task."""
+    conn = get_database_connection()
+    if conn:
+        try:
+            if task_id is not None:
+                df = pd.read_sql_query(
+                    "SELECT * FROM tasks WHERE task_id = ? AND is_active = 1",
+                    conn, params=[task_id]
+                )
+                conn.close()
+                return df
+
+            query = "SELECT * FROM tasks WHERE is_active = 1"
+            params = []
+
+            if division and division != "All":
+                query += " AND division LIKE ?"
+                params.append("%{}%".format(division))
+
+            if category and category != "All":
+                query += " AND category LIKE ?"
+                params.append("%{}%".format(category))
+
+            if search_term:
+                query += " AND (title LIKE ? OR task_description LIKE ?)"
+                params.extend(["%{}%".format(search_term), "%{}%".format(search_term)])
+
+            query += " ORDER BY title"
+
+            df = pd.read_sql_query(query, conn, params=params)
+            return df
+        finally:
+            conn.close()
+    return pd.DataFrame()
+
+# Ensure parent window listens for navigation requests from iframes (install once)
+st.markdown("""
+<script>
+(function(){
+  if (window.__va_parent_msg_listener_installed) return;
+  window.__va_parent_msg_listener_installed = true;
+  window.addEventListener('message', function(e){
+    try {
+      if (e.data && e.data.va_title_navigate) {
+        const params = new URLSearchParams(window.location.search || "");
+        params.set('page','notice');
+        // set search (reloads) to move to notice page
+        window.location.search = '?' + params.toString();
+      }
+      if (e.data && e.data.va_nav) {
+        const params = new URLSearchParams(window.location.search || "");
+        params.set('page', e.data.va_nav);
+        window.location.search = '?' + params.toString();
+      }
+    } catch (err) {
+      console.warn('va parent msg handler error', err);
+    }
+  }, false);
+})();
+</script>
+""", unsafe_allow_html=True)
+
+# Page navigation logic: prefer query param when present; initialize to "title" only if session state missing.
+def _get_qp(qp_obj, key):
+    try:
+        val = qp_obj.get(key)
+        if isinstance(val, (list, tuple)):
+            return val[0]
+        if isinstance(val, str):
+            return val
+        return None
+    except Exception:
+        return None
+
+try:
+    qp = st.query_params
+except Exception:
+    qp = {}
+requested_page = _get_qp(qp, "page") if qp else None
+_allowed_pages = {"title", "notice", "welcome", "main", "edit_task", "help", "task"}
+if requested_page in _allowed_pages:
+    # Always allow query-param driven navigation to override session_state on reloads
+    st.session_state.current_page = requested_page
+elif "current_page" not in st.session_state:
+    st.session_state.current_page = "title"
+
+def show_title_page():
+    """Title screen styled like scrWelcome: framed white canvas with left logo and right title/tagline."""
+    # Try to load the app logo (PNG with transparent background)
+    welcome_logo_b64 = None
+    for cand in [
+        "ai_assistant/images/VA AI Assistant Logo Transparent background.png",
+        "ai_assistant/images/welcome_logo.png",
+        "ai_assistant/images/VA Welcome Logo.png",
+        "ai_assistant/images/VA_Logo.png",
+    ]:
+        b = get_image_as_base64(cand)
+        if b:
+            welcome_logo_b64 = b
+            break
+
+    title_html = textwrap.dedent("""
+    <style>
+      html,body { height:100vh; margin:0; padding:0; overflow:hidden; -webkit-font-smoothing:antialiased; }
+      body { background: #0f1e42; }
+      /* Fill entire viewport with framed canvas (no surrounding whitespace) */
+      .welcome-canvas { width: 100vw; height: 100vh; background:#ffffff; border: 20px solid #111D42; border-radius: 8px; display:flex; align-items:center; justify-content:center; position: fixed; top:0; left:0; margin: 0; box-sizing: border-box; }
+      .welcome-row { display:flex; align-items:center; gap: 40px; max-width: 1150px; padding: 0 24px; }
+      .welcome-logo { width: 260px; height: 260px; border-radius: 50%; background: transparent; box-shadow: 0 18px 48px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; background-image: url("data:image/png;base64,__WELCOME_LOGO_B64__"); background-size: 130% 130%; background-repeat: no-repeat; background-position: center; }
+      .welcome-text { display:flex; flex-direction:column; justify-content:center; }
+      .welcome-text .brand-title { font-size: 64px; font-weight: 700; color:#111827; margin: 0 0 6px 0; letter-spacing: 0.5px; }
+      .welcome-text .tagline { font-size: 20px; font-style: italic; color:#6b7280; margin: 0 0 10px 0; }
+      .welcome-text .underline { width: 360px; height: 4px; background:#9aa8c5; border-radius: 2px; margin: 6px 0 8px 0; box-shadow: 0 1px 0 rgba(0,0,0,0.05); }
+      .version-badge-static { display:inline-block; background:#2e8540; color:#fff; padding:4px 0; border-radius:14px; font-weight:700; font-size: 14px; margin-top:6px; width:50px; text-align:center; }
+      .va-loader { position: absolute; right: 18px; bottom: 12px; display:flex; align-items:center; gap:8px; }
+      .va-loader .spinner { width:12px;height:12px;border-radius:50%;border:3px solid rgba(17,29,66,0.25);border-top-color:#111D42;animation:va-spin 1s linear infinite; }
+      .va-loader .loader-text { color:#111D42; font-weight:600; font-size:13px; }
+      @keyframes va-spin { to { transform: rotate(360deg); } }
+    </style>
+
+    <div class="welcome-canvas" role="main" aria-live="polite">
+      <div class="welcome-row">
+        <div class="welcome-logo"></div>
+        <div class="welcome-text">
+          <div class="brand-title">VA AI Assistant</div>
+          <div class="tagline">Built for the VA. Powered by AI.</div>
+          <div class="underline"></div>
+          <span class="version-badge-static">v1.4</span>
+        </div>
+      </div>
+      <div class="va-loader" aria-hidden="true">
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="loader-text">Loading...</div>
+      </div>
+    </div>
+
+    <script>
+    (function(){
+      if (window.__va_title_nav_installed) return;
+      window.__va_title_nav_installed = true;
+      function goNotice(){
+        var url = null;
+        try {
+          var u = new URL(window.location.href);
+          u.searchParams.set('page','notice');
+          url = u.toString();
+        } catch (e) {
+          try {
+            var qs = new URLSearchParams(window.location.search||'');
+            qs.set('page','notice');
+            url = '?' + qs.toString();
+          } catch(_) {}
+        }
+        if (url) {
+          try {
+            // Try anchor click first (often succeeds under CSP)
+            var a = document.createElement('a');
+            a.href = url; a.style.display='none'; document.body.appendChild(a); a.click();
+          } catch(_){ }
+          // Redundant fallbacks
+          setTimeout(function(){ try{ window.location.replace(url); }catch(_){} }, 50);
+          setTimeout(function(){ try{ window.location.href = url; }catch(_){} }, 150);
+          try { history.replaceState({}, '', url); window.location.reload(); } catch(_){ }
+        }
+        // Also message any listeners on this window and parent
