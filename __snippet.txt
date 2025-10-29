@@ -1,0 +1,26 @@
+    except Exception:
+        pass
+
+    # Render directly in the main document (no iframe) so anchors work even when
+    # inline scripts are blocked by CSP. Also override global overflow rules to
+    # allow scrolling on the help page.
+    help_scroll_override = """
+<style>
+  html, body, .block-container, [data-testid="stAppViewContainer"] {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+  }
+  /* Ensure the main page shows a vertical scrollbar when needed */
+  body { overscroll-behavior: contain; }
+  /* Avoid excessive fixed heights on containers within the help page */
+  .help-page { min-height: auto !important; }
+  .help-content { max-height: none !important; }
+  /* Make sure the left nav stays visible while scrolling */
+  .help-sidebar { position: sticky; top: 0.75rem; }
+</style>
+"""
+    st.markdown(help_scroll_override + help_html, unsafe_allow_html=True)
+
+def show_main_interface():
+    """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""

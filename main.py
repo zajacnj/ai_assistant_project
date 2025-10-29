@@ -1670,7 +1670,8 @@ def show_help_page():
     except Exception:
         pass
 
-    # Render via components to avoid Markdown code-block rules on indented HTML
+    # Render via components in an iframe with scrolling enabled. Our helper also
+    # injects iframe-safe CSS to restore scrolling and prevent overflow issues.
     components_html_with_css(help_html, height=900, scrolling=True)
 
 def show_main_interface():
@@ -2153,6 +2154,9 @@ elif st.session_state.current_page == "task":
     show_task_page()
 elif st.session_state.current_page == "edit_task":
     show_edit_task_page()
+
+
+
 
 
 

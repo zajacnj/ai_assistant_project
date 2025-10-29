@@ -1,0 +1,21 @@
+    except Exception:
+        pass
+
+    # Render via components in an iframe with scrolling enabled. Our helper also\n    # injects iframe-safe CSS to restore scrolling and prevent overflow issues.`n    components_html_with_css(help_html, height=900, scrolling=True)
+
+def show_main_interface():
+    """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
+
+    def _safe_list(df, col, default_list):
+        try:
+            if isinstance(df, pd.DataFrame) and col in df.columns:
+                vals = [v for v in df[col].dropna().astype(str).tolist() if v]
+                return sorted(list(dict.fromkeys(vals))) or default_list
+        except Exception:
+            pass
+        return default_list
+
+    # Load filters with safe fallbacks
+    divisions_df = load_divisions()
+    categories_df = load_categories()
+    divisions = ["VHA", "VBA", "NCA"]
