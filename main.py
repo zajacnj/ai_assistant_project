@@ -1481,10 +1481,18 @@ def show_help_page():
       e.preventDefault();
       const id = (this.getAttribute('href')||'').replace(/^.*#/, '');
       if (input) input.value = '';
-      history.replaceState(null, '', '#' + id);
+      // Some environments restrict history API in sandboxed iframes.
+      // Fall back to updating the hash directly so navigation still works.
+      try {
+        history.replaceState(null, '', '#' + id);
+      } catch (_) {
+        try { location.hash = id; } catch(__) {}
+      }
+      // Always render the requested section even if history update failed.
       showOnly(id);
       const cont = document.getElementById('help-content');
       if (cont){ window.scrollTo({ top: cont.offsetTop - 10, behavior: 'smooth' }); }
+      return false;
     });
   });
 
