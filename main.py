@@ -798,8 +798,11 @@ def components_html_with_css(inner_html: str, height: int = 600, scrolling: bool
     """
     iframe_safe_css = (
         "<style>"
-        "html,body{height:auto !important;min-height:0 !important;overflow:auto !important;}"
+        "html,body{height:auto !important;min-height:0 !important;overflow:auto !important;margin:0 !important;padding:0 !important;background:transparent !important;}"
+        "body{border:0 !important;}"
         ".block-container{height:auto !important;overflow:visible !important;}"
+        "<!-- Prevent clipped header inside iframe by neutralizing negative margins -->"
+        ".main-header{margin:0 0 1.5rem 0 !important;}"
         "</style>"
     )
     full_html = css_styles + "\n" + iframe_safe_css + "\n" + textwrap.dedent(inner_html)
@@ -1490,8 +1493,12 @@ def show_help_page():
       }
       // Always render the requested section even if history update failed.
       showOnly(id);
-      const cont = document.getElementById('help-content');
-      if (cont){ window.scrollTo({ top: cont.offsetTop - 10, behavior: 'smooth' }); }
+      // Ensure the top header is fully visible rather than partially clipped
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (_) {
+        try { window.scrollTo(0,0); } catch(__) {}
+      }
       return false;
     });
   });
@@ -1499,6 +1506,7 @@ def show_help_page():
   if (input){ input.addEventListener('input', e => filterHelp(e.target.value)); }
   window.addEventListener('hashchange', applyFromHash);
   applyFromHash();
+  try { window.scrollTo(0,0); } catch(_){ }
 
   // Route any links like "?page=welcome" to parent via postMessage
   try {
@@ -1678,9 +1686,24 @@ def show_help_page():
     except Exception:
         pass
 
-    # Render via components in an iframe with scrolling enabled. Our helper also
-    # injects iframe-safe CSS to restore scrolling and prevent overflow issues.
-    components_html_with_css(help_html, height=900, scrolling=True)
+    # Render directly in the main DOM to avoid any extra top spacing that
+    # Streamlit inserts around iframes. Also, relax global kiosk CSS so the
+    # help content can scroll and the header sits flush with the top.
+    help_dom_css = """
+    <style>
+      html, body, .block-container, [data-testid="stAppViewContainer"]{
+        overflow: auto !important; height: auto !important;
+        margin: 0 !important; padding: 0 !important;
+        background: transparent !important;
+      }
+      /* Keep the help header fully visible and centered */
+      .main-header{ margin: 0 0 1.5rem 0 !important; display:flex; align-items:center; }
+      .header-logo{ display:flex; align-items:center; }
+      .help-search{ display:flex; align-items:center; justify-content:center; }
+    </style>
+    """
+    # Dedent HTML so Markdown doesn't interpret 4+ space indents as code blocks
+    st.markdown(help_dom_css + textwrap.dedent(help_html), unsafe_allow_html=True)
 
 def show_main_interface():
     """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
