@@ -3,8 +3,8 @@
 fileWatcherType = "poll"
 # Reload the app automatically when files change
 runOnSave = true
-headless = true
+# Open browser (non-headless) so .\start launches the app visibly
+headless = false
 
 [browser]
 gatherUsageStats = false
-
