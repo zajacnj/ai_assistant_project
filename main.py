@@ -791,8 +791,18 @@ def components_html_with_css(inner_html: str, height: int = 600, scrolling: bool
     """
     Render HTML inside Streamlit components with the same css_styles injected
     so the iframe gets the styling. Fail gracefully and show error output.
+
+    Also inject a small override to re-enable scrolling within the iframe.
+    The global CSS used by the main app disables scrolling to create a kiosk-like
+    layout; inside an iframe this can prevent anchor navigation from working.
     """
-    full_html = css_styles + "\n" + textwrap.dedent(inner_html)
+    iframe_safe_css = (
+        "<style>"
+        "html,body{height:auto !important;min-height:0 !important;overflow:auto !important;}"
+        ".block-container{height:auto !important;overflow:visible !important;}"
+        "</style>"
+    )
+    full_html = css_styles + "\n" + iframe_safe_css + "\n" + textwrap.dedent(inner_html)
     try:
         return components.html(full_html, height=height, scrolling=scrolling)
     except Exception as e:
@@ -1481,6 +1491,21 @@ def show_help_page():
   if (input){ input.addEventListener('input', e => filterHelp(e.target.value)); }
   window.addEventListener('hashchange', applyFromHash);
   applyFromHash();
+
+  // Route any links like "?page=welcome" to parent via postMessage
+  try {
+    Array.from(document.querySelectorAll('a[href^="?page="]')).forEach(a => {
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        try {
+          var href = this.getAttribute('href') || '';
+          var page = (href.split('?')[1]||'').split('#')[0].split('&').map(function(kv){return kv.split('=');}).filter(function(kv){return kv[0]==='page';})[0];
+          var val = page && page[1] ? decodeURIComponent(page[1]) : null;
+          if (val) { window.parent.postMessage({va_nav: val}, '*'); }
+        } catch(_){}
+      });
+    });
+  } catch(_){ }
 })();
 </script>
 """
