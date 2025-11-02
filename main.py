@@ -1466,49 +1466,77 @@ def show_welcome_page():
 
 def show_help_page():
     """Recreated Help & How It Works (modeled after scrHelp)."""
-    # Inject CSS tweaks plus global home icon styling (outside iframe)
+    # Inject CSS ensuring reuse of .main-header plus help search styling
     st.markdown("""
     <style>
-      /* Use negative margin to pull iframe container upward */
-      div[data-testid="stVerticalBlock"] > div:has(iframe) { margin-top: -3rem !important; }
-      div[data-testid="element-container"]:has(iframe) { margin-top: -3rem !important; }
-      /* Global home icon placed outside iframe */
-      .global-home-link-wrapper { position: relative; width: 100%; }
-      .global-home-link { position: absolute; top: 10px; right: 18px; display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.4); text-decoration:none; cursor:pointer; z-index: 2000; }
-      .global-home-link:hover { background:rgba(255,255,255,0.3); transform:translateY(-2px); }
-      .global-home-link:focus-visible { outline:3px solid var(--va-gold); outline-offset:3px; }
-      .global-home-link svg { width:22px; height:22px; fill:#fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+      .main-header.help-header { display:flex; align-items:center; gap:30px; }
+      .help-header .help-search { display:flex; align-items:center; gap:8px; flex:1; }
+      .help-header .help-search input[type='search'] { flex:1; padding:6px 10px; border-radius:4px; border:1px solid var(--va-gray-light); }
+      .help-header .help-search select { padding:6px 4px; border-radius:4px; border:1px solid var(--va-gray-light); background:#fff; }
+      .help-header .help-search button { padding:6px 10px; border-radius:4px; border:1px solid var(--va-gray-light); background:#fff; cursor:pointer; }
+      .help-header .help-search button:hover { background:var(--va-gray-xlight); }
+      a.help-home-icon { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.4); text-decoration:none; }
+      a.help-home-icon:hover { background:rgba(255,255,255,0.3); transform:translateY(-2px); }
+      a.help-home-icon:focus-visible { outline:3px solid var(--va-gold); outline-offset:3px; }
+      a.help-home-icon svg { width:22px; height:22px; fill:#fff; filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+      /* Ensure next content not hidden */
+      div[data-testid="stVerticalBlock"] > div:has(iframe),
+      div[data-testid="element-container"]:has(iframe) { margin-top:0 !important; }
+      /* Remove default Streamlit page padding so header sits at very top */
+      .block-container { padding-top:0 !important; }
+      /* Optional: tighten top margin of help wrapper */
+      .help-wrapper { margin-top:0 !important; }
+      /* Pull help header upward like earlier implementation */
+      .main-header.help-header { margin-top:-3rem !important; }
     </style>
     """, unsafe_allow_html=True)
+
+    # Build header HTML (outside iframe) with search controls & home icon
+    header_html = """
+    <div class='main-header help-header'>
+      <div class='header-logo'><div class='header-logo-icon'></div> <span>Help &amp; How It Works</span></div>
+      <div class='help-search'>
+        <input id='help-search' type='search' placeholder='Search help...' aria-label='Search help' />
+        <select id='help-search-mode' aria-label='Search mode'>
+          <option value='any' selected>Any</option>
+          <option value='all'>All</option>
+          <option value='exact'>Exact</option>
+        </select>
+        <span id='help-search-count' style='color:#fff;opacity:.9;min-width:60px;'></span>
+        <button id='help-clear' title='Clear search'>Clear</button>
+        <button id='help-prev' title='Previous result'>◀</button>
+        <button id='help-next' title='Next result'>▶</button>
+      </div>
+      <a href='#' class='help-home-icon' id='help-home-server' title='Go to Welcome' aria-label='Go to Welcome'>
+        <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
+          <path d='M12 3.1 2 12h2.8v8h5.6v-5.2h3.2V20h5.6v-8H22L12 3.1zm0 2.4 6.4 5.6h-2v8h-3.2v-5.2H10.8V19H7.6v-8h-2L12 5.5z'></path>
+        </svg>
+      </a>
+    </div>
+    <script>
+      (function(){
+        // Home icon server navigation
+        const home = document.getElementById('help-home-server');
+        if (home && !home.__bound) {
+          home.__bound = true;
+          home.addEventListener('click', function(e){
+            e.preventDefault();
+            try {
+              const base = window.location.href.split('?')[0];
+              window.location.href = base + '?page=welcome';
+            } catch(_){ }
+          });
+        }
+      })();
+    </script>
+    """
+    st.markdown(header_html, unsafe_allow_html=True)
 
     # Render a Streamlit button styled as the home icon (server-side navigation reliable)
   # Remove overlay button; we will embed home icon in header HTML (inside iframe) but handle navigation via parent listener.
     
     help_html = textwrap.dedent(r"""
 <div class="help-wrapper">
-  <!-- Fixed Header at Top -->
-  <div class="main-header">
-    <div class="header-logo"><div class="header-logo-icon"></div> <span>Help &amp; How It Works</span></div>
-    <div class="help-search">
-    <input id="help-search" type="search" placeholder="Search help..." aria-label="Search help" />
-    <select id="help-search-mode" aria-label="Search mode" style="margin-left:8px;">
-      <option value="any" selected>Any</option>
-      <option value="all">All</option>
-      <option value="exact">Exact</option>
-    </select>
-    <span id="help-search-count" style="margin-left:12px;color:#fff;opacity:.9;"></span>
-    <button id="help-clear" title="Clear search" style="margin-left:8px;">Clear</button>
-    <button id="help-prev" title="Previous result" style="margin-left:8px;">◀</button>
-    <button id="help-next" title="Next result" style="margin-left:4px;">▶</button>
-  </div>
-  <div class="home-link-wrapper" style="display:flex;align-items:center;gap:10px;">
-    <a id="help-home-link" class="home-link" href="?page=welcome" title="Home" aria-label="Go to Welcome" style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);text-decoration:none;">
-      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:22px;height:22px;fill:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));"><path d="M12 3.1 2 12h2.8v8h5.6v-5.2h3.2V20h5.6v-8H22L12 3.1zm0 2.4 6.4 5.6h-2v8h-3.2v-5.2H10.8V19H7.6v-8h-2L12 5.5z"/></svg>
-    </a>
-  </div>
-</div>
-
-<!-- Scrollable Content Area -->
 <div class="help-page">
   <aside class="help-sidebar">
     <h4>Guide</h4>
@@ -1984,30 +2012,6 @@ def show_help_page():
   applyFromHash();
   try { window.scrollTo(0,0); } catch(_){ }
 
-  // Route any links like "?page=welcome" to parent - navigate with full URL
-  try {
-    Array.from(document.querySelectorAll('a[href^="?page="]')).forEach(a => {
-      a.addEventListener('click', function(e){
-        e.preventDefault();
-        var href = this.getAttribute('href') || '';
-        
-        // Build full URL from the parent's location
-        try {
-          var parentUrl = window.top.location.href.split('?')[0];
-          var fullUrl = parentUrl + href;
-          window.top.location.href = fullUrl;
-        } catch(securityError) {
-          // If cross-origin, try alternative approach
-          try {
-            window.parent.postMessage({type: 'navigate', url: href}, '*');
-          } catch(_) {
-            // Last resort - just navigate this window
-            window.location.href = href;
-          }
-        }
-      });
-    });
-  } catch(_){ }
 })();
 </script>
 </div>
@@ -2021,72 +2025,8 @@ def show_help_page():
         pass
 
     # Render using components_html_with_css which includes the iframe layout fixes
-    # Listener for direct global home navigation; translate message into URL param change
-    st.markdown("""
-    <script>
-    (function(){
-      if (window && !window.__va_nav_direct_listener) {
-        window.__va_nav_direct_listener = true;
-        window.addEventListener('message', function(ev){
-          try {
-            if (!ev || !ev.data) return; const d = ev.data;
-            if (d.type === 'va_nav_direct' && d.page === 'welcome') {
-              // Force full query param change
-              const base = window.location.href.split('?')[0];
-              window.location.href = base + '?page=welcome';
-            }
-          } catch(_){ }
-        });
-      }
-      // Intercept home link inside iframe and send message
-      try {
-        var hl = document.getElementById('help-home-link');
-        if (hl && !window.__helpHomeBound) {
-          window.__helpHomeBound = true;
-          hl.addEventListener('click', function(e){
-            e.preventDefault();
-            try { window.parent.postMessage({type:'va_nav_direct', page:'welcome'}, '*'); } catch(_){ }
-          });
-        }
-      } catch(_){ }
-      // Parent-level observer to catch iframe and bind home icon reliably
-      try {
-        if (!window.__vaIframeHomeObserver) {
-          window.__vaIframeHomeObserver = true;
-          const bindHome = () => {
-            try {
-              const iframes = Array.from(document.querySelectorAll('iframe'));
-              if (!iframes.length) return;
-              for (const f of iframes) {
-                try {
-                  const doc = f.contentDocument || f.contentWindow?.document;
-                  if (!doc) continue;
-                  const icon = doc.getElementById('help-home-link');
-                  if (icon && !icon.__vaBound) {
-                    icon.__vaBound = true;
-                    icon.addEventListener('click', function(ev){
-                      ev.preventDefault();
-                      try {
-                        const base = window.location.href.split('?')[0];
-                        window.location.href = base + '?page=welcome';
-                      } catch(e){ }
-                    });
-                  }
-                } catch(inner){ }
-              }
-            } catch(err){ }
-          };
-          bindHome();
-          const mo = new MutationObserver(bindHome);
-          mo.observe(document.body, {childList:true, subtree:true});
-        }
-      } catch(_){ }
-    })();
-    </script>
-    """, unsafe_allow_html=True)
+    # Render help content inside iframe component
     components_html_with_css(help_html, height=2500, scrolling=True)
-    
-  # Removed legacy Back buttons; navigation handled by home icon in header.
 
 def show_main_interface():
     """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
