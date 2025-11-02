@@ -119,6 +119,44 @@ css_template = """
     }}
     [data-testid="stHeader"] {{ display: none !important; height: 0 !important; }}
     [data-testid="stToolbar"] {{ display: none !important; }}
+    
+    /* Aggressively remove ALL top spacing */
+    section.main {{
+        padding-top: 0 !important;
+    }}
+    
+    /* Remove iframe spacing */
+    iframe {{
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }}
+    
+    /* Remove spacing from Streamlit's iframe container */
+    [data-testid="stIFrame"], 
+    .stIFrame,
+    div[data-testid="element-container"],
+    .element-container,
+    section[data-testid="stSidebar"] + div,
+    .main .block-container {{
+        margin: 0 !important;
+        padding: 0 !important;
+    }}
+    
+    /* Ensure the main element fills space */
+    .main {{
+        padding: 0 !important;
+        margin: 0 !important;
+    }}
+    
+    /* Force absolute zero spacing at the very top */
+    .main > div:first-child,
+    .main > .block-container > div:first-child,
+    [data-testid="stVerticalBlock"] > div:first-child {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
 
     :root {{
         --va-navy: #111D42;
@@ -404,11 +442,14 @@ css_template = """
         background: var(--va-navy);
         color: white;
         padding: 1rem 2rem;
-        margin: -1rem -1rem 2rem -1rem;
+        margin: 0;
         display: flex;
         align-items: center;
         justify-content: space-between;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        position: sticky;
+        top: 0;
+        z-index: 100;
     }}
 
     .header-logo {{
@@ -524,10 +565,17 @@ css_template = """
     }}
 
     /* ============ HELP PAGES ============ */
-    .help-page {{
+    .help-wrapper {{
         min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--va-gray-lightest);
+    }}
+    
+    .help-page {{
+        flex: 1;
         margin: 0;
-        padding: 0 1.5rem 2rem 1.5rem;
+        padding: 1.5rem;
         display: grid;
         grid-template-columns: 280px 1fr;
         gap: 1.5rem;
@@ -536,7 +584,7 @@ css_template = """
     }}
     .help-sidebar {{
         position: sticky;
-        top: 0.75rem;
+        top: 95px;
         align-self: start;
         background: #fff;
         border: 1px solid var(--va-gray-lighter);
@@ -596,6 +644,15 @@ css_template = """
         flex-shrink:0;
     }}
     .help-step .txt {{ color: var(--va-gray); line-height: 1.5; }}
+
+    /* Help search highlighting */
+    mark.help-hit {{
+        background: #FB890D;
+        color: #fff;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-weight: 600;
+    }}
 
     /* Help header search */
     .help-search {{
@@ -763,7 +820,6 @@ def _toggle_favorite_db(task_id: str):
         pass
     finally:
         conn.close()
-
 def _qp_get_local(qp_obj, key):
     """Small local helper so we don't rely on _get_qp being defined yet."""
     try:
@@ -798,16 +854,23 @@ def components_html_with_css(inner_html: str, height: int = 600, scrolling: bool
     """
     iframe_safe_css = (
         "<style>"
-        "html,body{height:auto !important;min-height:0 !important;overflow:auto !important;margin:0 !important;padding:0 !important;background:transparent !important;}"
-        "body{border:0 !important;}"
-        ".block-container{height:auto !important;overflow:visible !important;}"
-        "<!-- Prevent clipped header inside iframe by neutralizing negative margins -->"
-        ".main-header{margin:0 0 1.5rem 0 !important;}"
+        "html,body{height:100vh !important;margin:0 !important;padding:0 !important;overflow:hidden !important;background:var(--va-gray-lightest) !important;}"
+        ".help-wrapper{position:fixed !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;margin:0 !important;padding:0 !important;}"
+        ".main-header{flex-shrink:0 !important;width:100% !important;margin:0 !important;padding:1rem 2rem !important;z-index:1000 !important;background:var(--va-navy) !important;color:white !important;position:relative !important;}"
+        ".help-page{flex:1 1 auto !important;overflow-y:scroll !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch !important;padding:1.5rem !important;display:grid !important;grid-template-columns:280px 1fr !important;gap:1.5rem !important;align-items:start !important;align-content:start !important;margin:0 !important;background:var(--va-gray-lightest) !important;min-height:0 !important;height:100% !important;}"
+        ".help-sidebar{position:sticky !important;top:0.5rem !important;align-self:start !important;height:fit-content !important;}"
+        ".help-content{overflow:visible !important;min-height:min-content !important;height:auto !important;}"
+        "/* Force scrollbar to always show and make it functional */"
+        ".help-page{scrollbar-width:thin !important;scrollbar-color:#888 #f1f1f1 !important;}"
+        ".help-page::-webkit-scrollbar{width:14px !important;}"
+        ".help-page::-webkit-scrollbar-track{background:#f1f1f1 !important;}"
+        ".help-page::-webkit-scrollbar-thumb{background:#888 !important;border-radius:7px !important;border:2px solid #f1f1f1 !important;}"
+        ".help-page::-webkit-scrollbar-thumb:hover{background:#555 !important;}"
         "</style>"
     )
-    full_html = css_styles + "\n" + iframe_safe_css + "\n" + textwrap.dedent(inner_html)
+    full_html = css_styles + "\n" + iframe_safe_css + "\n" + inner_html
     try:
-        return components.html(full_html, height=height, scrolling=scrolling)
+        return components.html(full_html, height=height, scrolling=False)
     except Exception as e:
         st.error(f"components.html failed: {e}")
         # show the raw HTML as text to help debugging
@@ -1339,13 +1402,42 @@ def show_welcome_page():
 
 def show_help_page():
     """Recreated Help & How It Works (modeled after scrHelp)."""
-    help_html = """
-<div class="main-header">
-  <div class="header-logo"><div class="header-logo-icon"></div> <span>Help &amp; How It Works</span></div>
-  <div class="help-search"><input id="help-search" type="search" placeholder="Search help..." aria-label="Search help" /></div>
+    
+    # Inject CSS into Streamlit page to pull iframe up with negative margin
+    st.markdown("""
+        <style>
+        /* Use negative margin to pull iframe container upward */
+        div[data-testid="stVerticalBlock"] > div:has(iframe) {
+            margin-top: -3rem !important;
+        }
+        /* Alternative: target element-container that holds iframe */
+        div[data-testid="element-container"]:has(iframe) {
+            margin-top: -3rem !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+    
+    help_html = textwrap.dedent(r"""
+<div class="help-wrapper">
+  <!-- Fixed Header at Top -->
+  <div class="main-header">
+    <div class="header-logo"><div class="header-logo-icon"></div> <span>Help &amp; How It Works</span></div>
+    <div class="help-search">
+    <input id="help-search" type="search" placeholder="Search help..." aria-label="Search help" />
+    <select id="help-search-mode" aria-label="Search mode" style="margin-left:8px;">
+      <option value="any" selected>Any</option>
+      <option value="all">All</option>
+      <option value="exact">Exact</option>
+    </select>
+    <span id="help-search-count" style="margin-left:12px;color:#fff;opacity:.9;"></span>
+    <button id="help-clear" title="Clear search" style="margin-left:8px;">Clear</button>
+    <button id="help-prev" title="Previous result" style="margin-left:8px;">◀</button>
+    <button id="help-next" title="Next result" style="margin-left:4px;">▶</button>
+  </div>
   <div style="width:120px"></div>
 </div>
 
+<!-- Scrollable Content Area -->
 <div class="help-page">
   <aside class="help-sidebar">
     <h4>Guide</h4>
@@ -1360,90 +1452,266 @@ def show_help_page():
       <a href="#help-trouble">Troubleshooting</a>
     </nav>
     <div style="margin-top:12px; text-align:center;">
-      <a class="cta-btn cta-secondary" href="?page=welcome">Back</a>
+      <a class="cta-btn cta-secondary" href="?page=welcome" target="_top">Back</a>
     </div>
   </aside>
   <section class="help-content" id="help-content">
     <section class="help-section" id="help-start" data-label="Getting Started">
       <div class="help-hero"><div class="title">Getting Started</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">From the Welcome screen, click <b>Explore Tasks</b> to open the main catalog of AI templates.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Use the division and category filters (left) or the search box to quickly focus the list.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Click any task card to view full details, instructions, and its AI prompt.</div></div>
+        <p><b>Welcome to the VA AI Assistant!</b></p>
+        <p>This application helps VA employees generate professional AI prompts for common tasks across all divisions.</p>
+        <p><b>What You Can Do:</b></p>
+        <ul>
+          <li><b>Browse Pre-built Templates:</b> Access 30+ task templates organized by division and category</li>
+          <li><b>Customize Prompts:</b> Tailor prompts with your specific context and requirements</li>
+          <li><b>Create Your Own:</b> Build custom task templates for your unique needs</li>
+          <li><b>Save Favorites:</b> Quick access to frequently used prompts</li>
+        </ul>
+        <p><b>Quick Start Steps:</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt">Click <b>Explore Tasks</b> from the main menu</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Select your division (VHA, VBA, or NCA) or browse all</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Choose a category that matches your work area</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Select a task template</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt">Customize the prompt with your specific information</div></div>
+        <div class="help-step"><div class="dot">6</div><div class="txt">Copy the generated prompt to your AI tool</div></div>
       </div>
     </section>
 
     <section class="help-section" id="help-nav" data-label="Navigation">
       <div class="help-hero"><div class="title">Navigation</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Top Bar</b>: Use the header to return Home or open Help.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Filters</b>: Division and Category buttons refine the visible tasks.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Search</b>: Type key words (e.g., “summary”, “report”) to find matching templates.</div></div>
+        <p><b>Understanding the App Flow</b></p>
+        <p>The VA AI Assistant follows a guided workflow: Title Screen → Notice → Welcome → Main Catalog → Task Details</p>
+        
+        <p style="margin-top: 12px;"><b>Screen Descriptions</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Title Screen</b>: Landing page with VA branding and Continue button</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Notice Page</b>: Important usage guidelines and acknowledgment requirement</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Welcome Page</b>: Overview of features with Get Started button</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Main Page</b>: Full catalog with filters, search, and task cards</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Task Detail Page</b>: Individual task view with prompt tabs and customization options</div></div>
+        
+        <p style="margin-top: 12px;"><b>Navigation Features</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Header Bar</b>: Always visible at top - click "VA AI Assistant" to return to Main, or "Help" to open this guide</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Back Buttons</b>: Use "Back to [Page]" links at bottom of screens to navigate backward</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Division Filters</b>: Click VHA, VBA, or NCA buttons to show tasks for specific VA divisions</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Category Filters</b>: Select categories (Clinical, Administrative, etc.) to narrow task list</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt"><b>Breadcrumbs</b>: Task detail pages show Division > Category > Task name hierarchy</div></div>
       </div>
     </section>
 
     <section class="help-section" id="help-find" data-label="Finding Tasks">
       <div class="help-hero"><div class="title">Finding Tasks</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Browse by <b>Division</b> (e.g., Clinical, Administrative) to narrow context.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Pick a <b>Category</b> (e.g., Documentation, Communication) for specific workflows.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Use <b>Search</b> for quick discovery across all tasks.</div></div>
+        <p><b>Browse by Division</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt">Click the <b>Division filter</b> buttons at the top of the Main page (VHA, VBA, NCA, or All)</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Select your VA division to see only relevant tasks for your work area</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Task count updates automatically to show how many tasks match your filter</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Combine with Category filters for more precise results</div></div>
+        
+        <p style="margin-top: 12px;"><b>Browse by Category</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Clinical</b>: Patient care, treatment planning, clinical documentation</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Administrative</b>: Reports, memos, policy documents, scheduling</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Communication</b>: Emails, notifications, announcements, veteran correspondence</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Education</b>: Training materials, presentations, educational content</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Analysis</b>: Data analysis, performance metrics, quality improvement</div></div>
+        
+        <p style="margin-top: 12px;"><b>Search Tips</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Use keywords</b>: Type words like "discharge", "summary", "report" in the search box</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Search across all fields</b>: Search looks in task titles, descriptions, and prompt content</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Combine filters</b>: Use Division + Category + Search together for laser-focused results</div></div>
       </div>
     </section>
 
     <section class="help-section" id="help-create" data-label="Creating Tasks">
       <div class="help-hero"><div class="title">Creating Tasks</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Open a template and click <b>Create/Edit</b> to add or refine its content.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Provide a descriptive <b>Title</b>, <b>Description</b>, and assign a Division/Category.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Save the task and it becomes available in the catalog with your settings.</div></div>
+        <p><b>Basic Task Information</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Task Title</b>: Create a clear, descriptive name (e.g., "Discharge Summary - Mental Health")</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Description</b>: Explain what the task accomplishes and when to use it</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Division</b>: Assign to VHA, VBA, or NCA based on primary use case</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Category</b>: Select the most appropriate category (Clinical, Administrative, etc.)</div></div>
+        
+        <p style="margin-top: 12px;"><b>Task Configuration</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Prompt Tabs</b>: Create prompts for different AI platforms (ChatGPT, Claude, Gemini, Meta AI, Copilot)</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Use Placeholders</b>: Include [DATE], [PATIENT_NAME], [UNIT], [GOAL] for reusability</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Structure Prompts</b>: Use clear sections: Context, Instructions, Format Requirements, Examples</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Test Output</b>: Copy prompt to AI tool and validate the response quality before saving</div></div>
+        
+        <p style="margin-top: 12px;"><b>Settings & Metadata</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Sort Order</b>: Set display priority (lower numbers appear first)</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Active Status</b>: Mark inactive to hide tasks without deleting them</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Tags/Keywords</b>: Add searchable terms to improve discoverability</div></div>
+        
+        <p style="margin-top: 12px;"><b>Best Practices for New Tasks</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Start from existing</b>: Clone similar tasks and modify rather than starting from scratch</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Be specific</b>: Narrow tasks are more useful than generic "write something" prompts</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Document assumptions</b>: Note any prerequisites or context needed in the description</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Get feedback</b>: Share with colleagues and iterate based on their experience</div></div>
       </div>
     </section>
 
     <section class="help-section" id="help-customize" data-label="Customizing Prompts">
       <div class="help-hero"><div class="title">Customizing Prompts</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt">Start from a curated prompt and tailor <b>patient details</b>, <b>context</b>, and <b>tone</b>.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt">Use placeholders like <code>[DATE]</code>, <code>[UNIT]</code>, <code>[GOAL]</code> to keep prompts reusable.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt">Preview output, then iterate to improve clarity or reduce length.</div></div>
+        <p><b>Understanding Prompt Tabs</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>ChatGPT Tab</b>: Optimized for OpenAI ChatGPT (GPT-4, GPT-3.5) - works well with detailed instructions</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Claude Tab</b>: Designed for Anthropic Claude - excels at analysis and long-form content</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Gemini Tab</b>: Tailored for Google Gemini - good for multi-modal tasks and research</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Meta AI Tab</b>: Prompts for Meta's Llama models - free and accessible alternative</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Copilot Tab</b>: Microsoft Copilot format - integrated with Office 365 tools</div></div>
+        
+        <p style="margin-top: 12px;"><b>Customization Workflow</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Select your AI platform</b>: Click the appropriate tab for your preferred tool</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Copy the base prompt</b>: Use the Copy button to get the template text</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Replace placeholders</b>: Fill in [DATE], [PATIENT_NAME], [UNIT], [GOAL] with actual values</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Add context</b>: Include specific details about your situation, patient, or requirements</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt"><b>Adjust tone/format</b>: Modify language for formal vs conversational, brief vs detailed</div></div>
+        
+        <p style="margin-top: 12px;"><b>Common Placeholder Variables</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><code>[DATE]</code> - Appointment date, report date, or timeframe</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><code>[PATIENT_NAME]</code> - Veteran name or identifier (use care with PHI)</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><code>[UNIT]</code> - Department, ward, or facility name</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><code>[GOAL]</code> - Objective, outcome, or purpose of the document</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><code>[CONTEXT]</code> - Background information, previous events, relevant history</div></div>
+        
+        <p style="margin-top: 12px;"><b>⚠️ Privacy & Security Warnings</b></p>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>Never include PHI/PII</b>: Do not paste patient names, SSNs, MRNs, or identifying details into external AI tools</div></div>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>Use generic examples</b>: Replace real data with "Veteran A", "Unit X", "Date TBD" when testing prompts</div></div>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>Review AI output</b>: Always validate, edit, and sanitize content before using in official documentation</div></div>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>Follow VA policies</b>: Comply with VA Directive 6517, HIPAA, and local facility guidelines</div></div>
       </div>
     </section>
 
     <section class="help-section" id="help-favorites" data-label="Using Favorites">
       <div class="help-hero"><div class="title">Using Favorites</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Click the <b>★</b> icon on any task to mark it as a favorite.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Filter the catalog by <b>Favorites</b> to see only starred items.</div></div>
+        <p><b>Adding to Favorites</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt">Browse the task catalog on the Main page</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Click the <b>★ Star icon</b> in the top-right corner of any task card</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Star turns <span style="color: #FB890D;">gold</span> to confirm the task is favorited</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Favorite status persists across sessions (saved to database)</div></div>
+        
+        <p style="margin-top: 12px;"><b>Viewing Favorites</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Click the <b>"Show Favorites Only"</b> toggle/filter at the top of the Main page</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Task list updates to display only your starred tasks</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Favorites filter works alongside Division and Category filters</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt">Turn off the filter to see all tasks again</div></div>
+        
+        <p style="margin-top: 12px;"><b>Managing Favorites</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Remove from favorites</b>: Click the gold ★ icon again to un-favorite</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Organize by use</b>: Star your most frequently used tasks for quick access</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Personal library</b>: Each user has their own favorites (not shared)</div></div>
+        
+        <p style="margin-top: 12px;"><b>Tips for Using Favorites Effectively</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Daily tasks</b>: Favorite prompts you use every day (discharge summaries, progress notes)</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Role-specific</b>: Curate a collection that matches your job responsibilities</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Keep it focused</b>: Too many favorites defeats the purpose - aim for 5-15 core tasks</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Review periodically</b>: Update your favorites as your workflow changes</div></div>
       </div>
     </section>
 
     <section class="help-section" id="help-best" data-label="Best Practices">
       <div class="help-hero"><div class="title">Best Practices</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Verify</b> all AI-assisted content for accuracy and relevance before use.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Customize</b> prompts to reflect site-specific or case-specific details.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Comply</b> with VA policies and documentation standards at all times.</div></div>
+        <p><b>Writing Effective Prompts</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Be specific</b>: Include exact requirements, format, length, and tone expectations</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Provide context</b>: Give the AI background information about the situation and audience</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Use examples</b>: Show the AI what good output looks like with sample text</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Structure instructions</b>: Break complex requests into numbered steps or sections</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt"><b>Iterate and refine</b>: Test prompts multiple times and adjust based on results</div></div>
+        
+        <p style="margin-top: 12px;"><b>Context Guidelines</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>VA-specific language</b>: Use proper VA terminology (Veteran not patient, facility not hospital)</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Audience awareness</b>: Specify if output is for Veterans, staff, leadership, or external stakeholders</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Regulatory compliance</b>: Mention relevant policies, standards, or requirements in the prompt</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Tone control</b>: Explicitly request formal, conversational, empathetic, or authoritative tone</div></div>
+        
+        <p style="margin-top: 12px;"><b>Output Optimization</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Length limits</b>: Specify word count, paragraph count, or "brief/detailed" expectations</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Format requests</b>: Ask for bullet points, numbered lists, tables, or narrative paragraphs</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Constraints</b>: Define what NOT to include (jargon, assumptions, filler content)</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Multiple options</b>: Request 2-3 variations to choose the best fit</div></div>
+        
+        <p style="margin-top: 12px;"><b>Quality Checks</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>Accuracy</b>: Verify all facts, dates, names, and references before using AI content</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Completeness</b>: Ensure output addresses all requirements in your original prompt</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Appropriateness</b>: Confirm tone, language, and style match the intended use case</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Compliance</b>: Check alignment with VA policies, documentation standards, and regulations</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt"><b>Human touch</b>: Add personal insights, local context, and professional judgment</div></div>
+        <div class="help-step"><div class="dot">6</div><div class="txt"><b>Edit thoroughly</b>: Treat AI output as a first draft, not final copy</div></div>
+        
+        <p style="margin-top: 12px;"><b>Security & Privacy Reminders</b></p>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>NO PHI/PII</b>: Never input patient names, SSNs, MRNs, addresses, or identifying information</div></div>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>Use generic data</b>: Test prompts with fictional examples, not real Veteran information</div></div>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>External AI tools</b>: Assume any data entered into ChatGPT, Claude, etc. is NOT secure</div></div>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>Official documentation</b>: Review all AI-generated content before adding to medical records</div></div>
+        <div class="help-step"><div class="dot">⚠</div><div class="txt"><b>Follow policy</b>: Adhere to VA Directive 6517, HIPAA, and local facility AI usage guidelines</div></div>
       </div>
     </section>
 
     <section class="help-section" id="help-trouble" data-label="Troubleshooting">
       <div class="help-hero"><div class="title">Troubleshooting</div></div>
       <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt"><b>No results?</b> Clear filters, broaden your search, or switch divisions.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Styling issues?</b> Refresh the browser or clear cache to reload app CSS.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Navigation not advancing?</b> Ensure you acknowledged the notice and avoid blocking popups or scripts.</div></div>
+        <p><b>No Tasks Showing / Empty Catalog</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Check filters</b>: Click "All" for Division and Category to reset filters</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Clear search</b>: Delete any text in the search box and press Enter</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Turn off Favorites filter</b>: If enabled, you may have no favorited tasks yet</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Database issue</b>: Ensure `python database_setup.py` was run successfully</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Check console</b>: Open browser DevTools (F12) to look for error messages</div></div>
+        
+        <p style="margin-top: 12px;"><b>Page Not Loading / Stuck on Screen</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Notice acknowledgment</b>: Make sure you clicked "I Acknowledge" on the Notice page</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Session state</b>: Refresh the browser (Ctrl+F5) to reset session state</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>URL parameters</b>: Check that URL shows `?page=main` or appropriate page name</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Restart app</b>: Stop Streamlit (Ctrl+C) and run `streamlit run main.py` again</div></div>
+        
+        <p style="margin-top: 12px;"><b>Styling / Visual Issues</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Hard refresh</b>: Press Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac) to clear cache</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Browser compatibility</b>: Use Chrome, Edge, or Firefox - Safari may have issues</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Zoom level</b>: Reset browser zoom to 100% (Ctrl+0)</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>CSS loading</b>: Check browser console for "Failed to load" errors with CSS/images</div></div>
+        
+        <p style="margin-top: 12px;"><b>Search Not Working</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Press Enter</b>: Search requires hitting Enter key after typing, not just typing</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Check spelling</b>: Verify search terms match task content (case-insensitive)</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Broaden terms</b>: Try shorter, more general keywords instead of full phrases</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Search mode</b>: Switch between "Any Word", "All Words", "Exact Phrase" modes</div></div>
+        
+        <p style="margin-top: 12px;"><b>Database Errors</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt"><b>File not found</b>: Run `python database_setup.py` to create initial database</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Import data</b>: Place CSV files in `ai_assistant/data/sharepoint/` and run `python import_real_data.py`</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Permissions</b>: Ensure write permissions on `ai_assistant/database/` folder</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Corrupted DB</b>: Delete `ai_assistant.db` and re-run setup scripts</div></div>
+        
+        <p style="margin-top: 12px;"><b>Copy Button Not Working</b></p>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>HTTPS required</b>: Clipboard API only works on HTTPS or localhost - not HTTP</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Permissions</b>: Allow clipboard access when browser prompts</div></div>
+        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Manual copy</b>: Select text and use Ctrl+C if button fails</div></div>
+        
+        <p style="margin-top: 12px;"><b>Still Having Issues?</b></p>
+        <div class="help-step"><div class="dot">1</div><div class="txt">Check the browser console (F12 → Console tab) for JavaScript errors</div></div>
+        <div class="help-step"><div class="dot">2</div><div class="txt">Review terminal output where Streamlit is running for Python errors</div></div>
+        <div class="help-step"><div class="dot">3</div><div class="txt">Verify all dependencies installed: `pip install -r requirements.txt`</div></div>
+        <div class="help-step"><div class="dot">4</div><div class="txt">Consult PROJECT_SUMMARY.md and SETUP_GUIDE.md for detailed documentation</div></div>
+        <div class="help-step"><div class="dot">5</div><div class="txt">Contact your VA IT support or the application administrator for assistance</div></div>
       </div>
     </section>
 
     <div style="text-align:center; margin-top: 16px;">
-      <a class="cta-btn cta-secondary" href="?page=welcome">Back to Welcome</a>
+      <a class="cta-btn cta-secondary" href="?page=welcome" target="_top">Back to Welcome</a>
     </div>
   </section>
+</div>
 </div>
 
 <script>
 (function(){
   const input = document.getElementById('help-search');
+  const modeSel = document.getElementById('help-search-mode');
+  const countSpan = document.getElementById('help-search-count');
+  const prevBtn = document.getElementById('help-prev');
+  const nextBtn = document.getElementById('help-next');
   const sections = Array.from(document.querySelectorAll('.help-section'));
   const links = Array.from(document.querySelectorAll('.help-nav a'));
 
@@ -1466,17 +1734,125 @@ def show_help_page():
     showOnly(id);
   }
 
-  function filterHelp(q){
-    const term = (q||'').trim().toLowerCase();
-    if (term){
-      sections.forEach(sec => {
-        const text = sec.textContent.toLowerCase();
-        sec.style.display = text.includes(term) ? '' : 'none';
-      });
-      setActive(null);
-    } else {
-      applyFromHash();
+  // Search + highlight helpers
+  function escapeRegExp(s){ 
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function clearHighlights(){
+    Array.from(document.querySelectorAll('mark.help-hit')).forEach(m => {
+      const t = document.createTextNode(m.textContent);
+      m.parentNode.replaceChild(t, m);
+    });
+    // Normalize text nodes after removing marks
+    document.querySelectorAll('.help-section').forEach(sec => {
+      sec.normalize();
+    });
+  }
+
+  function highlightIn(root, re){
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+    const created = [];
+    const nodesToProcess = [];
+    let node;
+    
+    // First, collect all text nodes
+    while ((node = walker.nextNode())){
+      if (node.nodeValue && node.nodeValue.trim()) {
+        nodesToProcess.push(node);
+      }
     }
+    
+    // Then process them
+    nodesToProcess.forEach(node => {
+      const text = node.nodeValue;
+      re.lastIndex = 0;
+      if (!re.test(text)) { return; }
+      
+      re.lastIndex = 0;
+      const frag = document.createDocumentFragment();
+      let last = 0;
+      let m;
+      
+      while ((m = re.exec(text))){
+        if (m.index > last) {
+          frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        }
+        const mark = document.createElement('mark');
+        mark.className = 'help-hit';
+        mark.textContent = m[0];
+        frag.appendChild(mark);
+        created.push(mark);
+        last = m.index + m[0].length;
+      }
+      if (last < text.length) {
+        frag.appendChild(document.createTextNode(text.slice(last)));
+      }
+      if (node.parentNode) {
+        node.parentNode.replaceChild(frag, node);
+      }
+    });
+    
+    return created;
+  }
+
+  function doSearch(){
+    const q = (input && input.value || '').trim();
+    const mode = (modeSel && modeSel.value) || 'any';
+    clearHighlights();
+    window.__helpMatches = [];
+    window.__helpMatchIdx = -1;
+    if (!q){
+      // reset view
+      sections.forEach(sec => sec.style.display = '');
+      countSpan && (countSpan.textContent = '');
+      prevBtn && (prevBtn.disabled = true);
+      nextBtn && (nextBtn.disabled = true);
+      applyFromHash();
+      return;
+    }
+    const toks = q.split(/\\s+/).filter(Boolean);
+    const lowerToks = toks.map(t => t.toLowerCase());
+    const re = new RegExp('(' + (mode === 'exact' ? escapeRegExp(q) : lowerToks.map(escapeRegExp).join('|')) + ')', 'gi');
+
+    sections.forEach(sec => {
+      const text = sec.textContent.toLowerCase();
+      let match = false;
+      if (mode === 'exact') match = text.includes(q.toLowerCase());
+      else if (mode === 'all') match = lowerToks.every(t => text.includes(t));
+      else match = lowerToks.some(t => text.includes(t));
+      sec.style.display = match ? '' : 'none';
+      if (match){
+        const created = highlightIn(sec, re);
+        window.__helpMatches.push.apply(window.__helpMatches, created);
+      }
+    });
+
+    const total = window.__helpMatches.length;
+    countSpan && (countSpan.textContent = total ? total + ' results' : '0 results');
+    prevBtn && (prevBtn.disabled = total <= 1);
+    nextBtn && (nextBtn.disabled = total <= 1);
+
+    if (total > 0){
+      window.__helpMatchIdx = 0;
+      jumpToMatch(0);
+    }
+  }
+
+  function jumpToMatch(idx){
+    const hits = window.__helpMatches || [];
+    if (!hits.length) return;
+    const n = hits.length;
+    const i = ((idx % n) + n) % n;
+    window.__helpMatchIdx = i;
+    const el = hits[i];
+    // ensure its section is visible and active
+    let p = el.parentElement;
+    while (p && !p.classList.contains('help-section')) p = p.parentElement;
+    if (p){ showOnly(p.id); }
+    const rect = el.getBoundingClientRect();
+    const y = rect.top + window.pageYOffset - 80;
+    try { window.scrollTo({ top: y, behavior: 'smooth' }); } catch(_) { window.scrollTo(0, y); }
   }
 
   links.forEach(a => {
@@ -1503,207 +1879,85 @@ def show_help_page():
     });
   });
 
-  if (input){ input.addEventListener('input', e => filterHelp(e.target.value)); }
+  if (input){
+    input.addEventListener('input', doSearch);
+    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doSearch(); }});
+  }
+  if (modeSel){ modeSel.addEventListener('change', doSearch); }
+  // Clear button
+  const clearBtn = document.getElementById('help-clear');
+  if (clearBtn){ clearBtn.addEventListener('click', function(){
+    if (input) input.value = '';
+    if (modeSel) modeSel.value = 'any';
+    clearHighlights();
+    sections.forEach(sec => sec.style.display = '');
+    countSpan && (countSpan.textContent = '');
+    prevBtn && (prevBtn.disabled = true);
+    nextBtn && (nextBtn.disabled = true);
+    applyFromHash();
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(_) { window.scrollTo(0,0); }
+  }); }
+
+  if (prevBtn){ prevBtn.addEventListener('click', function(){
+    const i = (window.__helpMatchIdx || 0) - 1; jumpToMatch(i);
+  }); }
+  if (nextBtn){ nextBtn.addEventListener('click', function(){
+    const i = (window.__helpMatchIdx || 0) + 1; jumpToMatch(i);
+  }); }
   window.addEventListener('hashchange', applyFromHash);
   applyFromHash();
   try { window.scrollTo(0,0); } catch(_){ }
 
-  // Route any links like "?page=welcome" to parent via postMessage
+  // Route any links like "?page=welcome" to parent - navigate with full URL
   try {
     Array.from(document.querySelectorAll('a[href^="?page="]')).forEach(a => {
       a.addEventListener('click', function(e){
         e.preventDefault();
+        var href = this.getAttribute('href') || '';
+        
+        // Build full URL from the parent's location
         try {
-          var href = this.getAttribute('href') || '';
-          var page = (href.split('?')[1]||'').split('#')[0].split('&').map(function(kv){return kv.split('=');}).filter(function(kv){return kv[0]==='page';})[0];
-          var val = page && page[1] ? decodeURIComponent(page[1]) : null;
-          if (val) { window.parent.postMessage({va_nav: val}, '*'); }
-        } catch(_){}
+          var parentUrl = window.top.location.href.split('?')[0];
+          var fullUrl = parentUrl + href;
+          window.top.location.href = fullUrl;
+        } catch(securityError) {
+          // If cross-origin, try alternative approach
+          try {
+            window.parent.postMessage({type: 'navigate', url: href}, '*');
+          } catch(_) {
+            // Last resort - just navigate this window
+            window.location.href = href;
+          }
+        }
       });
     });
   } catch(_){ }
 })();
 </script>
-"""
+</div>
+<!-- Close help-wrapper -->
+""")
 
-    # Normalize any stray bell characters and enrich help content
+    # Normalize any stray bell characters
     try:
         help_html = help_html.replace('<div class="dot">\a</div>', '<div class="dot">•</div>')
-        # Getting Started: add steps 4-5
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">From the Welcome screen, click <b>Explore Tasks</b> to open the main catalog of AI templates.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Use the division and category filters (left) or the search box to quickly focus the list.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Click any task card to view full details, instructions, and its AI prompt.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">From the Welcome screen, click <b>Explore Tasks</b> to open the main catalog of AI templates.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Use the division and category filters (left) or the search box to quickly focus the list.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Click any task card to view full details, instructions, and its AI prompt.</div></div>
-        <div class="help-step"><div class="dot">4</div><div class="txt">Mark frequently used templates with the <b>star</b> icon and filter by <b>Favorites</b>.</div></div>
-        <div class="help-step"><div class="dot">5</div><div class="txt">Open <b>Help</b> anytime from the header to learn features or troubleshoot.</div></div>
-      </div>
-""",
-        )
-
-        # Navigation: swap bullets and add pagination + task cards notes
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Top Bar</b>: Use the header to return Home or open Help.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Filters</b>: Division and Category buttons refine the visible tasks.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Search</b>: Type key words (e.g., "summary", "report") to find matching templates.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Top Bar</b>: Use the header to return Home or open Help.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Filters</b>: Division and Category buttons refine the visible tasks.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Search</b>: Type key words (e.g., "summary", "report") to find matching templates.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Pagination</b>: Use <i>Prev</i>/<i>Next</i> and the page indicator to browse more results.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Task Cards</b>: Click a card title to open details; use the star to favorite.</div></div>
-      </div>
-""",
-        )
-
-        # Finding Tasks: add combination/reset tips
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Browse by <b>Division</b> (e.g., Clinical, Administrative) to narrow context.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Pick a <b>Category</b> (e.g., Documentation, Communication) for specific workflows.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Use <b>Search</b> for quick discovery across all tasks.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Browse by <b>Division</b> (e.g., Clinical, Administrative) to narrow context.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Pick a <b>Category</b> (e.g., Documentation, Communication) for specific workflows.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Use <b>Search</b> for quick discovery across all tasks.</div></div>
-        <div class="help-step"><div class="dot">4</div><div class="txt">Combine filters + search to pinpoint exactly what you need.</div></div>
-        <div class="help-step"><div class="dot">5</div><div class="txt">To reset, set Division to <b>All</b> and clear the search box.</div></div>
-      </div>
-""",
-        )
-
-        # Creating Tasks: expand details fields
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Open a template and click <b>Create/Edit</b> to add or refine its content.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Provide a descriptive <b>Title</b>, <b>Description</b>, and assign a Division/Category.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Save the task and it becomes available in the catalog with your settings.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Open a template and click <b>Create/Edit</b> to add or refine its content.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Provide a descriptive <b>Title</b>, <b>Description</b>, and assign a Division/Category.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Use <b>Due date</b>, <b>Priority</b>, <b>Tags</b>, and <b>References</b> to keep work organized.</div></div>
-        <div class="help-step"><div class="dot">4</div><div class="txt">Click <b>Save</b>. Your task appears in the catalog with your selections.</div></div>
-      </div>
-""",
-        )
-
-        # Customizing Prompts: expand bullets and add privacy/examples
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt">Start from a curated prompt and tailor <b>patient details</b>, <b>context</b>, and <b>tone</b>.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt">Use placeholders like <code>[DATE]</code>, <code>[UNIT]</code>, <code>[GOAL]</code> to keep prompts reusable.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt">Preview output, then iterate to improve clarity or reduce length.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt">Start from a curated prompt and tailor <b>patient details</b>, <b>context</b>, and <b>tone</b>.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt">Use placeholders like <code>[DATE]</code>, <code>[UNIT]</code>, <code>[GOAL]</code> to keep prompts reusable.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt">Preview output, then iterate to improve clarity or reduce length.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Privacy</b>: Do not include PHI/PII unless authorized and required.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Examples</b>: Provide short, concrete examples to guide tone and structure.</div></div>
-      </div>
-""",
-        )
-
-        # Using Favorites: add more steps and clarify star
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Click the <b>?</b> icon on any task to mark it as a favorite.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Filter the catalog by <b>Favorites</b> to see only starred items.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt">Click the <b>star</b> icon on any task to mark it as a favorite.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt">Use the <b>Favorites</b> toggle to view only your starred items.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt">Star/unstar from the task card or details page; changes apply instantly.</div></div>
-        <div class="help-step"><div class="dot">4</div><div class="txt">Favorites help you build a quick-access list across divisions and categories.</div></div>
-      </div>
-""",
-        )
-
-        # Best Practices: add concise tip
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Verify</b> all AI-assisted content for accuracy and relevance before use.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Customize</b> prompts to reflect site-specific or case-specific details.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Comply</b> with VA policies and documentation standards at all times.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Verify</b> all AI-assisted content for accuracy and relevance before use.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Customize</b> prompts to reflect site-specific or case-specific details.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Comply</b> with VA policies and documentation standards at all times.</div></div>
-        <div class="help-step"><div class="dot">•</div><div class="txt"><b>Be concise</b>: Short, clear inputs yield better results than long, multi-topic prompts.</div></div>
-      </div>
-""",
-        )
-
-        # Troubleshooting: add empty catalog note
-        help_html = help_html.replace(
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt"><b>No results?</b> Clear filters, broaden your search, or switch divisions.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Styling issues?</b> Refresh the browser or clear cache to reload app CSS.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Navigation not advancing?</b> Ensure you acknowledged the notice and avoid blocking popups or scripts.</div></div>
-      </div>
-""",
-            """
-      <div class="help-card">
-        <div class="help-step"><div class="dot">1</div><div class="txt"><b>No results?</b> Clear filters, broaden your search, or switch divisions.</div></div>
-        <div class="help-step"><div class="dot">2</div><div class="txt"><b>Styling issues?</b> Refresh the browser or clear cache to reload app CSS.</div></div>
-        <div class="help-step"><div class="dot">3</div><div class="txt"><b>Navigation not advancing?</b> Ensure you acknowledged the notice and avoid blocking popups or scripts.</div></div>
-        <div class="help-step"><div class="dot">4</div><div class="txt"><b>Empty catalog?</b> If the database is unavailable, sample cards appear—try again later or contact support.</div></div>
-      </div>
-""",
-        )
     except Exception:
         pass
 
-    # Render directly in the main DOM to avoid any extra top spacing that
-    # Streamlit inserts around iframes. Also, relax global kiosk CSS so the
-    # help content can scroll and the header sits flush with the top.
-    help_dom_css = """
-    <style>
-      html, body, .block-container, [data-testid="stAppViewContainer"]{
-        overflow: auto !important; height: auto !important;
-        margin: 0 !important; padding: 0 !important;
-        background: transparent !important;
-      }
-      /* Keep the help header fully visible and centered */
-      .main-header{ margin: 0 0 1.5rem 0 !important; display:flex; align-items:center; }
-      .header-logo{ display:flex; align-items:center; }
-      .help-search{ display:flex; align-items:center; justify-content:center; }
-    </style>
-    """
-    # Dedent HTML so Markdown doesn't interpret 4+ space indents as code blocks
-    st.markdown(help_dom_css + textwrap.dedent(help_html), unsafe_allow_html=True)
+    # Render using components_html_with_css which includes the iframe layout fixes
+    components_html_with_css(help_html, height=2500, scrolling=True)
+    
+    # Add Streamlit navigation buttons below
+    st.markdown("---")
+    col1, col2, col3 = st.columns([1, 1, 2])
+    with col1:
+        if st.button("◄ Back", key="help_back_btn"):
+            st.session_state.current_page = "welcome"
+            st.rerun()
+    with col2:
+        if st.button("🏠 Back to Welcome", key="help_welcome_btn"):
+            st.session_state.current_page = "welcome"
+            st.rerun()
 
 def show_main_interface():
     """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""

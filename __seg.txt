@@ -1,0 +1,4 @@
+base64("ai_assistant/images/Seal_of_the_U.S._Department_of_Veterans_Affairs.svg")
+vha_icon_b64 = get_image_as_base64("ai_assistant/images/VHA.png")
+vba_icon_b64 = get_image_as_base64("ai_assistant/images/VBA.png")
+nca
