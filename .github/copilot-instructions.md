@@ -1,250 +1,72 @@
-# VA AI Assistant - GitHub Copilot Instructions# VA AI Assistant - GitHub Copilot Instructions
+<!-- Updated: 2025-11-02 -->
+# VA AI Assistant – Agent Instructions
 
-<!-- Updated: 2025-10-30 -->
+Concise guidance for AI coding agents working in this Streamlit + SQLite project converted from a Power Apps application.
 
-## Project Overview
+## 1. Big Picture
+Data path: CSV exports (SharePoint lists) → SQLite (`ai_assistant/database/ai_assistant.db`) → Pandas DataFrames → Rendered UI in `main.py`.
+Navigation path: Query Params (`?page=...`) override Session State → Page function dispatch → HTML/CSS injection.
+Primary screens: `title` → `notice` → `welcome` → `main` (catalog) → `task` / `edit_task` → `help`.
 
-This is a VA (Veterans Affairs) AI Assistant - a Streamlit web application converted from a Power Apps application. It helps VA employees generate AI prompts for common tasks across different divisions (VHA, VBA, NCA).## Project Overview
+## 2. Core Files
+`main.py` – Monolithic app: navigation, styling, page renderers, DB queries, dynamic HTML/JS.
+`database_setup.py` – Creates tables (`divisions`, `categories`, `tasks`, `user_tasks`, `user_favorites`). Run after schema changes.
+`import_real_data.py` – Loads real SharePoint-exported CSVs in `ai_assistant/data/sharepoint/` into existing tables.
+`ai_assistant_setup.py` – Bootstraps directory structure on first run.
+`requirements.txt` – Baseline deps (Streamlit, Pandas, Pillow, etc.) plus commented optional integrations.
 
-This is a **VA (Veterans Affairs) AI Assistant** - a Streamlit web application converted from a Power Apps application. It helps VA employees generate AI prompts for common tasks across different divisions (VHA, VBA, NCA).
-
-## Architecture & Data Flow
-
-```## Architecture & Data Flow
-
-CSV/SharePoint → SQLite Database → Pandas DataFrames → Streamlit UI```
-
-```CSV/SharePoint → SQLite Database → Pandas DataFrames → Streamlit UI
-
-```
-
-**Core Flow**: Page Navigation → Session State → Database Query → Display Results
-
-**Core Flow**: Page Navigation → Session State → Database Query → Display Results
-
-### Key Files Structure
-
-- `main.py` - Main Streamlit app with all screens and navigation logic### Key Files Structure
-
-- `database_setup.py` - Creates SQLite database and schema from sample data  - `main.py` - Main Streamlit app with all screens and navigation logic
-
-- `import_real_data.py` - Imports actual CSV data from SharePoint exports- `database_setup.py` - Creates SQLite database and schema from sample data  
-
-- `ai_assistant_setup.py` - Creates project folder structure- `import_real_data.py` - Imports actual CSV data from SharePoint exports
-
-- `ai_assistant/database/ai_assistant.db` - SQLite database (created by setup)- `ai_assistant_setup.py` - Creates project folder structure
-
-- `ai_assistant/data/sharepoint/` - CSV files exported from SharePoint- `ai_assistant/database/ai_assistant.db` - SQLite database (created by setup)
-
-- `ai_assistant/data/sharepoint/` - CSV files exported from SharePoint
-
-## Navigation Pattern
-
-The app uses **query parameter-driven navigation** with session state fallback:## Navigation Pattern
-
-The app uses **query parameter-driven navigation** with session state fallback:
-
+## 3. Data Access Pattern
+Always open DB via `get_database_connection()`; guard with `if conn:`. Query pattern:
 ```python
-
-# Page routing in main.py (around line 1240)```python
-
-requested_page = _get_qp(qp, "page") if qp else None# Page routing in main.py (around line 1240)
-
-_allowed_pages = {"title", "notice", "welcome", "main", "edit_task", "help", "task"}requested_page = _get_qp(qp, "page") if qp else None
-
-if requested_page in _allowed_pages:_allowed_pages = {"title", "notice", "welcome", "main", "edit_task", "help", "task"}
-
-    st.session_state.current_page = requested_pageif requested_page in _allowed_pages:
-
-```    st.session_state.current_page = requested_page
-
+conn = get_database_connection()
+if conn:
+    df = pd.read_sql_query("SELECT * FROM tasks WHERE is_active = 1 ...", conn, params=[...])
+    conn.close()
 ```
+Filtering uses LIKE and `%{}%` for division/category; `is_active = 1` is mandatory. Favor extending `load_tasks()` arguments instead of duplicating logic.
 
-**Page Flow**: `title` → `notice` → `welcome` → `main` → `task`/`edit_task`
+## 4. Navigation & State
+Query params (`st.query_params`) are authoritative when present; fallback initializes `st.session_state.current_page`. Allowed pages listed in `_allowed_pages`. After changing `st.session_state.current_page` call `st.rerun()`. To add a page: (1) add to `_allowed_pages`, (2) create `show_[name]_page()` implementation, (3) extend dispatch section.
 
-**Page Flow**: `title` → `notice` → `welcome` → `main` → `task`/`edit_task`
+## 5. Styling & Components
+Global CSS template near top of `main.py` (variable placeholders filled with `.format`). Images embedded as Base64 via `get_image_as_base64()`. For complex markup isolated in an iframe use `components_html_with_css()` to inject both global and iframe-specific scroll overrides. Keep additions inside existing pattern: define snippet → pass to helper; avoid raw `components.html` duplication.
 
-## Database Schema & Data Loading
+## 6. Favorites & Lightweight API Actions
+## 6. Favorites & Lightweight API Actions
+Favoriting implemented by query param API (early exit via api=favt&task=ID param) or inline toggle (favt param). Helper functions toggle_favorite_db and toggle_favorite update the is_favorite column. When extending, keep fast path before page render and use st.stop after response.
 
-**Key Tables**: `divisions`, `categories`, `tasks`, `user_tasks`, `user_favorites`## Database Schema & Data Loading
+## 7. Conventions & Naming
+- Page functions follow show_PAGENAME_page pattern from Power Apps heritage
+- Data loaders follow load_ENTITY pattern and must filter where is_active equals 1
+- All tables include sort_order columns for display ordering
+- Template prompt placeholders like `[DATE]` and `[PATIENT_NAME]` are literal - do not transform
+- CSS color variables use the --va-COLORNAME naming scheme
 
-**Key Tables**: `divisions`, `categories`, `tasks`, `user_tasks`, `user_favorites`
-
-**Standard Database Pattern**:
-
-```python**Standard Database Pattern**:
-
-def load_[entity]():```python
-
-    conn = get_database_connection()def load_[entity]():
-
-    if conn:    conn = get_database_connection()
-
-        df = pd.read_sql_query("SELECT * FROM [table] WHERE is_active = 1 ORDER BY sort_order", conn)    if conn:
-
-        conn.close()        df = pd.read_sql_query("SELECT * FROM [table] WHERE is_active = 1 ORDER BY sort_order", conn)
-
-        return df        conn.close()
-
-    return pd.DataFrame()        return df
-
-```    return pd.DataFrame()
-
-```
-
-**Connection**: Always use `get_database_connection()` - handles errors gracefully and connects to `ai_assistant/database/ai_assistant.db`
-
-**Connection**: Always use `get_database_connection()` - handles errors gracefully and connects to `ai_assistant/database/ai_assistant.db`
-
-## CSS & Styling System
-
-The app uses **extensive CSS-in-HTML** with VA design system colors:## CSS & Styling System
-
-The app uses **extensive CSS-in-HTML** with VA design system colors:
-
-**Key VA Colors** (defined around line 70 in main.py):
-
-- va-navy: primary navy blue color**Key VA Colors** (defined around line 70 in main.py):
-
-- va-blue: accent blue color- va-navy: primary navy blue color
-
-- va-gold: highlight gold color- va-blue: accent blue color
-
-- va-gold: highlight gold color
-
-**Image Handling**: SVG/PNG files converted to base64 with `get_image_as_base64()` for embedding in CSS background-image rules.
-
-**Image Handling**: SVG/PNG files converted to base64 with `get_image_as_base64()` for embedding in CSS `background-image` rules.
-
-## Development Workflows
-
-## Development Workflows
-
-### Setup Commands (Windows)
-
-```bash### Setup Commands (Windows)
-
-# One-time setup```bash
-
-setup.bat                    # Installs packages + creates structure + sets up DB# One-time setup
-
-# OR manual:setup.bat                    # Installs packages + creates structure + sets up DB
-
-pip install -r requirements.txt# OR manual:
-
-python ai_assistant_setup.py pip install -r requirements.txt
-
-python database_setup.pypython ai_assistant_setup.py 
-
+## 8. Developer Workflow (Windows)
+Initial setup: run `setup.bat` (installs deps, creates structure, builds DB). Manual equivalent:
+```bash
+pip install -r requirements.txt
+python ai_assistant_setup.py
 python database_setup.py
-
-# Run application  
-
-streamlit run main.py# Run application  
-
 streamlit run main.py
-
-# Import real data
-
-python import_real_data.py   # After placing CSV files in ai_assistant/data/# Import real data
-
-```python import_real_data.py   # After placing CSV files in ai_assistant/data/
-
 ```
+Import real data: place CSVs in `ai_assistant/data/sharepoint/` then `python import_real_data.py`.
+Schema change: edit `database_setup.py` then re-run it; adjust corresponding load function(s).
 
-### Key Development Patterns
+## 9. Error Handling & Debugging Patterns
+All DB ops guarded (`if conn:`); CSS injection wrapped in try/except and falls back to minimal style. For syntax validation use: `py -c "import ast; ast.parse(open('main.py', encoding='utf-8').read())"`. Query param driven actions happen early and may call `st.stop()`. When adding new early handlers keep them above page dispatch and after CSS injection.
 
-### Key Development Patterns
+## 10. Adding Features Safely
+Extend with minimal intrusion: reuse existing CSS template (add placeholders), prefer augmenting `load_tasks()` rather than new query functions. Respect the kiosk-style no-scroll design—if embedding scrollable content use the iframe override pattern found in `components_html_with_css()`. Avoid large refactors without splitting `main.py` (future improvement: migrate pages into `ai_assistant/pages/`).
 
-**Add New Screen**:
+## 11. Integration Points (Future)
+AI services placeholders (OpenAI, Anthropic) are not active; uncomment packages in `requirements.txt` then implement calls in a new helper (e.g., `generate_ai_response(prompt, user_input)`). Authentication planned via `streamlit-authenticator`. Keep these optional so base app runs without secrets.
 
-1. Add page name to `_allowed_pages` list**Add New Screen**:
+## 12. Common Pitfalls
+Empty catalog: run `database_setup.py` and ensure CSV imports; clear filters (`div=All&cat=All`). Broken navigation: confirm page in `_allowed_pages` and query param presence. Styling anomalies: hard refresh (cache), check that `css_template` format placeholders still match names.
 
-2. Create `show_[page]_page()` function1. Add page name to `_allowed_pages` list
+## 13. What Not To Change
+Do not remove `is_active` filtering, CSS variable names, or Base64 image approach (avoids external asset dependencies). Preserve query param names (`page`, `div`, `cat`, `q`, `fav`, `mine`, `task`).
 
-3. Add routing case in main navigation logic2. Create `show_[page]_page()` function
-
-4. Use `components_html_with_css()` for complex HTML+CSS3. Add routing case in main navigation logic
-
-4. Use `components_html_with_css()` for complex HTML+CSS
-
-**Database Changes**:
-
-1. Modify schema in `database_setup.py`**Database Changes**:
-
-2. Update corresponding `load_[entity]()` function1. Modify schema in `database_setup.py`
-
-3. Test with `python database_setup.py`2. Update corresponding `load_[entity]()` function
-
-3. Test with `python database_setup.py`
-
-**Navigation Links**:
-
-```html**Navigation Links**:
-
-<a href="?page=main">Navigate to Main</a>```html
-
-```<a href="?page=main">Navigate to Main</a>
-
-```
-
-## Project-Specific Conventions
-
-## Project-Specific Conventions
-
-### Error Handling
-
-- Database connections always check `if conn:` before queries### Error Handling
-
-- Image loading uses try/except with fallback to None- Database connections always check `if conn:` before queries
-
-- CSS injection wrapped in try/except with fallback styles- Image loading uses try/except with fallback to None
-
-- CSS injection wrapped in try/except with fallback styles
-
-### Session State Usage
-
-- `st.session_state.current_page` - Primary navigation state### Session State Usage
-
-- `st.session_state.acknowledged` - Notice page acknowledgment- `st.session_state.current_page` - Primary navigation state
-
-- Navigation uses `st.rerun()` after state changes- `st.session_state.acknowledged` - Notice page acknowledgment
-
-- Navigation uses `st.rerun()` after state changes
-
-### PowerApps Migration Context
-
-- Original app was Power Apps with SharePoint backend### PowerApps Migration Context
-
-- Screen names preserve PowerApps naming (e.g., `scrWelcome` → `show_welcome_page()`)- Original app was Power Apps with SharePoint backend
-
-- Reference files in `reference/powerapps_ctx/` contain original app structure- Screen names preserve PowerApps naming (e.g., `scrWelcome` → `show_welcome_page()`)
-
-- CSV files maintain SharePoint column names and schema- Reference files in `reference/powerapps_ctx/` contain original app structure
-
-- CSV files maintain SharePoint column names and schema
-
-## Common Debugging
-
-- **Database errors**: Check if `python database_setup.py` was run## Common Debugging
-
-- **Missing images**: Verify files exist in `ai_assistant/images/`- **Database errors**: Check if `python database_setup.py` was run
-
-- **CSS issues**: Check `components_html_with_css()` usage vs `st.markdown()`- **Missing images**: Verify files exist in `ai_assistant/images/`
-
-- **Navigation issues**: Verify page name in `_allowed_pages` and routing logic- **CSS issues**: Check `components_html_with_css()` usage vs `st.markdown()`
-
-- **Syntax errors**: Use `py -c "import ast; ast.parse(open('main.py', encoding='utf-8').read())"` to validate syntax- **Navigation issues**: Verify page name in `_allowed_pages` and routing logic
-
-- **Function structure**: Check for incomplete try/except blocks and missing function closures- **Syntax errors**: Use `py -c "import ast; ast.parse(open('main.py', encoding='utf-8').read())"` to validate syntax
-
-- **Function structure**: Check for incomplete try/except blocks and missing function closures
-
-## Integration Points
-
-- **SharePoint**: CSV export → Python import workflow via `import_real_data.py`## Integration Points
-
-- **AI Services**: Placeholder integration points in PROJECT_SUMMARY.md for ChatGPT/Claude- **SharePoint**: CSV export → Python import workflow via `import_real_data.py`
-
-- **Authentication**: Future integration points documented but not implemented- **AI Services**: Placeholder integration points in PROJECT_SUMMARY.md for ChatGPT/Claude
-- **Authentication**: Future integration points documented but not implemented
+---
+If any section is unclear or missing context (tests, modularization, deployment), request clarification before large changes.

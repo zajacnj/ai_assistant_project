@@ -472,7 +472,7 @@ css_template = """
         font-weight: bold;
         font-size: 18px;
         {header_logo_icon_bg}
-        background-size: 35px 35px;
+        background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
     }}
@@ -857,15 +857,17 @@ def components_html_with_css(inner_html: str, height: int = 600, scrolling: bool
         "html,body{height:100vh !important;margin:0 !important;padding:0 !important;overflow:hidden !important;background:var(--va-gray-lightest) !important;}"
         ".help-wrapper{position:fixed !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;margin:0 !important;padding:0 !important;}"
         ".main-header{flex-shrink:0 !important;width:100% !important;margin:0 !important;padding:1rem 2rem !important;z-index:1000 !important;background:var(--va-navy) !important;color:white !important;position:relative !important;}"
-        ".help-page{flex:1 1 auto !important;overflow-y:scroll !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch !important;padding:1.5rem !important;display:grid !important;grid-template-columns:280px 1fr !important;gap:1.5rem !important;align-items:start !important;align-content:start !important;margin:0 !important;background:var(--va-gray-lightest) !important;min-height:0 !important;height:100% !important;}"
-        ".help-sidebar{position:sticky !important;top:0.5rem !important;align-self:start !important;height:fit-content !important;}"
-        ".help-content{overflow:visible !important;min-height:min-content !important;height:auto !important;}"
-        "/* Force scrollbar to always show and make it functional */"
-        ".help-page{scrollbar-width:thin !important;scrollbar-color:#888 #f1f1f1 !important;}"
-        ".help-page::-webkit-scrollbar{width:14px !important;}"
-        ".help-page::-webkit-scrollbar-track{background:#f1f1f1 !important;}"
-        ".help-page::-webkit-scrollbar-thumb{background:#888 !important;border-radius:7px !important;border:2px solid #f1f1f1 !important;}"
-        ".help-page::-webkit-scrollbar-thumb:hover{background:#555 !important;}"
+        "/* Grid container - no scroll, just layout */"
+        ".help-page{flex:1 1 0px !important;overflow:hidden !important;display:grid !important;grid-template-columns:280px 1fr !important;gap:1.5rem !important;padding:1.5rem !important;margin:0 !important;background:var(--va-gray-lightest) !important;min-height:0 !important;}"
+        ".help-sidebar{grid-column:1 !important;align-self:start !important;overflow:visible !important;position:sticky !important;top:0 !important;}"
+        "/* Content area scrolls */"
+        ".help-content{grid-column:2 !important;overflow-y:auto !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch !important;height:100% !important;}"
+        "/* Scrollbar styling */"
+        ".help-content::-webkit-scrollbar{width:12px !important;background:#e0e0e0 !important;}"
+        ".help-content::-webkit-scrollbar-track{background:#e0e0e0 !important;}"
+        ".help-content::-webkit-scrollbar-thumb{background:#888 !important;border-radius:6px !important;min-height:40px !important;}"
+        ".help-content::-webkit-scrollbar-thumb:hover{background:#555 !important;}"
+        ".help-content{scrollbar-width:thin !important;scrollbar-color:#888 #e0e0e0 !important;}"
         "</style>"
     )
     full_html = css_styles + "\n" + iframe_safe_css + "\n" + inner_html
