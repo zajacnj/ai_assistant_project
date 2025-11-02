@@ -452,6 +452,43 @@ css_template = """
         z-index: 100;
     }}
 
+  .home-link-wrapper {{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }}
+
+  .home-link {{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+     /* subtle translucent white ring */
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.4);
+    text-decoration: none;
+    transition: background .2s, transform .15s;
+  }}
+
+  .home-link:focus-visible {{
+    outline: 3px solid var(--va-gold);
+    outline-offset: 3px;
+  }}
+
+  .home-link:hover {{
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+  }}
+
+  .home-link svg {{
+    width: 22px;
+    height: 22px;
+    fill: #fff;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  }}
+
     .header-logo {{
         display: flex;
         align-items: center;
@@ -1429,20 +1466,23 @@ def show_welcome_page():
 
 def show_help_page():
     """Recreated Help & How It Works (modeled after scrHelp)."""
-    
-    # Inject CSS into Streamlit page to pull iframe up with negative margin
+    # Inject CSS tweaks plus global home icon styling (outside iframe)
     st.markdown("""
-        <style>
-        /* Use negative margin to pull iframe container upward */
-        div[data-testid="stVerticalBlock"] > div:has(iframe) {
-            margin-top: -3rem !important;
-        }
-        /* Alternative: target element-container that holds iframe */
-        div[data-testid="element-container"]:has(iframe) {
-            margin-top: -3rem !important;
-        }
-        </style>
+    <style>
+      /* Use negative margin to pull iframe container upward */
+      div[data-testid="stVerticalBlock"] > div:has(iframe) { margin-top: -3rem !important; }
+      div[data-testid="element-container"]:has(iframe) { margin-top: -3rem !important; }
+      /* Global home icon placed outside iframe */
+      .global-home-link-wrapper { position: relative; width: 100%; }
+      .global-home-link { position: absolute; top: 10px; right: 18px; display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.4); text-decoration:none; cursor:pointer; z-index: 2000; }
+      .global-home-link:hover { background:rgba(255,255,255,0.3); transform:translateY(-2px); }
+      .global-home-link:focus-visible { outline:3px solid var(--va-gold); outline-offset:3px; }
+      .global-home-link svg { width:22px; height:22px; fill:#fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4)); }
+    </style>
     """, unsafe_allow_html=True)
+
+    # Render a Streamlit button styled as the home icon (server-side navigation reliable)
+  # Remove overlay button; we will embed home icon in header HTML (inside iframe) but handle navigation via parent listener.
     
     help_html = textwrap.dedent(r"""
 <div class="help-wrapper">
@@ -1461,7 +1501,11 @@ def show_help_page():
     <button id="help-prev" title="Previous result" style="margin-left:8px;">◀</button>
     <button id="help-next" title="Next result" style="margin-left:4px;">▶</button>
   </div>
-  <div style="width:120px"></div>
+  <div class="home-link-wrapper" style="display:flex;align-items:center;gap:10px;">
+    <a id="help-home-link" class="home-link" href="?page=welcome" title="Home" aria-label="Go to Welcome" style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);text-decoration:none;">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" style="width:22px;height:22px;fill:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.4));"><path d="M12 3.1 2 12h2.8v8h5.6v-5.2h3.2V20h5.6v-8H22L12 3.1zm0 2.4 6.4 5.6h-2v8h-3.2v-5.2H10.8V19H7.6v-8h-2L12 5.5z"/></svg>
+    </a>
+  </div>
 </div>
 
 <!-- Scrollable Content Area -->
@@ -1977,19 +2021,72 @@ def show_help_page():
         pass
 
     # Render using components_html_with_css which includes the iframe layout fixes
+    # Listener for direct global home navigation; translate message into URL param change
+    st.markdown("""
+    <script>
+    (function(){
+      if (window && !window.__va_nav_direct_listener) {
+        window.__va_nav_direct_listener = true;
+        window.addEventListener('message', function(ev){
+          try {
+            if (!ev || !ev.data) return; const d = ev.data;
+            if (d.type === 'va_nav_direct' && d.page === 'welcome') {
+              // Force full query param change
+              const base = window.location.href.split('?')[0];
+              window.location.href = base + '?page=welcome';
+            }
+          } catch(_){ }
+        });
+      }
+      // Intercept home link inside iframe and send message
+      try {
+        var hl = document.getElementById('help-home-link');
+        if (hl && !window.__helpHomeBound) {
+          window.__helpHomeBound = true;
+          hl.addEventListener('click', function(e){
+            e.preventDefault();
+            try { window.parent.postMessage({type:'va_nav_direct', page:'welcome'}, '*'); } catch(_){ }
+          });
+        }
+      } catch(_){ }
+      // Parent-level observer to catch iframe and bind home icon reliably
+      try {
+        if (!window.__vaIframeHomeObserver) {
+          window.__vaIframeHomeObserver = true;
+          const bindHome = () => {
+            try {
+              const iframes = Array.from(document.querySelectorAll('iframe'));
+              if (!iframes.length) return;
+              for (const f of iframes) {
+                try {
+                  const doc = f.contentDocument || f.contentWindow?.document;
+                  if (!doc) continue;
+                  const icon = doc.getElementById('help-home-link');
+                  if (icon && !icon.__vaBound) {
+                    icon.__vaBound = true;
+                    icon.addEventListener('click', function(ev){
+                      ev.preventDefault();
+                      try {
+                        const base = window.location.href.split('?')[0];
+                        window.location.href = base + '?page=welcome';
+                      } catch(e){ }
+                    });
+                  }
+                } catch(inner){ }
+              }
+            } catch(err){ }
+          };
+          bindHome();
+          const mo = new MutationObserver(bindHome);
+          mo.observe(document.body, {childList:true, subtree:true});
+        }
+      } catch(_){ }
+    })();
+    </script>
+    """, unsafe_allow_html=True)
     components_html_with_css(help_html, height=2500, scrolling=True)
     
-    # Add Streamlit navigation buttons below
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 1, 2])
-    with col1:
-        if st.button("◄ Back", key="help_back_btn"):
-            st.session_state.current_page = "welcome"
-            st.rerun()
-    with col2:
-        if st.button("🏠 Back to Welcome", key="help_welcome_btn"):
-            st.session_state.current_page = "welcome"
-            st.rerun()
+  # Removed legacy Back buttons; navigation handled by home icon in header.
 
 def show_main_interface():
     """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
