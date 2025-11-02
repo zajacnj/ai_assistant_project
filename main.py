@@ -635,7 +635,7 @@ css_template = """
         border-radius: 12px;
         padding: 1rem 1.25rem;
         margin: 0.75rem 0 1rem 0;
-        max-height: 450px;
+    max-height: 600px;
         overflow-y: auto;
     }}
     .help-card::-webkit-scrollbar {{
