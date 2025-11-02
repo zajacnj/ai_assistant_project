@@ -671,6 +671,13 @@ css_template = """
         border-radius: 3px;
         font-weight: 600;
     }}
+  /* Currently selected search result */
+  mark.help-hit.current {{
+    background: #0f1e42 !important;
+    color: #fff !important;
+    outline: 2px solid #FB890D !important;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.85), 0 0 0 4px #0f1e42;
+  }}
 
     /* Help header search */
     .help-search {{
@@ -1866,6 +1873,11 @@ def show_help_page():
     const i = ((idx % n) + n) % n;
     window.__helpMatchIdx = i;
     const el = hits[i];
+    // Update current class on hits
+    try {
+      hits.forEach(h => h.classList && h.classList.remove('current'));
+      if (el && el.classList) { el.classList.add('current'); }
+    } catch(_){}
     // ensure its section is visible and active
     let p = el.parentElement;
     while (p && !p.classList.contains('help-section')) p = p.parentElement;
