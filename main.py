@@ -614,13 +614,14 @@ css_template = """
         color: var(--va-navy);
         font-weight: 700;
     }}
-    .help-content {{
-        background: #fff;
-        border: 1px solid var(--va-gray-lighter);
-        border-radius: 12px;
-        padding: 1.5rem 1.75rem;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-    }}
+  .help-content {{
+    background: #fff;
+    border: 1px solid var(--va-gray-lighter);
+    border-radius: 12px; /* keep all corners rounded including bottom */
+    padding: 1.5rem 1.75rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    margin-bottom: 32px; /* requested extra gray space below card */
+  }}
     .help-hero {{
         display:flex; align-items:center; justify-content:space-between;
         gap: 1rem; margin-bottom: 1rem;
@@ -634,6 +635,23 @@ css_template = """
         border-radius: 12px;
         padding: 1rem 1.25rem;
         margin: 0.75rem 0 1rem 0;
+        max-height: 450px;
+        overflow-y: auto;
+    }}
+    .help-card::-webkit-scrollbar {{
+        width: 10px;
+        background: #e8e8e8;
+    }}
+    .help-card::-webkit-scrollbar-track {{
+        background: #e8e8e8;
+        border-radius: 5px;
+    }}
+    .help-card::-webkit-scrollbar-thumb {{
+        background: #999;
+        border-radius: 5px;
+    }}
+    .help-card::-webkit-scrollbar-thumb:hover {{
+        background: #777;
     }}
     .help-step {{ display:flex; align-items:flex-start; gap: 12px; margin: 8px 0; }}
     .help-step .dot {{
@@ -858,10 +876,10 @@ def components_html_with_css(inner_html: str, height: int = 600, scrolling: bool
         ".help-wrapper{position:fixed !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;margin:0 !important;padding:0 !important;}"
         ".main-header{flex-shrink:0 !important;width:100% !important;margin:0 !important;padding:1rem 2rem !important;z-index:1000 !important;background:var(--va-navy) !important;color:white !important;position:relative !important;}"
         "/* Grid container - no scroll, just layout */"
-        ".help-page{flex:1 1 0px !important;overflow:hidden !important;display:grid !important;grid-template-columns:280px 1fr !important;gap:1.5rem !important;padding:1.5rem !important;margin:0 !important;background:var(--va-gray-lightest) !important;min-height:0 !important;}"
+        ".help-page{flex:1 1 0px !important;overflow:hidden !important;display:grid !important;grid-template-columns:280px 1fr !important;gap:1.5rem !important;padding:1.5rem 1.5rem 1.5rem 1.5rem !important;margin:0 !important;background:var(--va-gray-lightest) !important;min-height:0 !important;}"
         ".help-sidebar{grid-column:1 !important;align-self:start !important;overflow:visible !important;position:sticky !important;top:0 !important;}"
         "/* Content area scrolls */"
-        ".help-content{grid-column:2 !important;overflow-y:auto !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch !important;height:100% !important;}"
+        ".help-content{grid-column:2 !important;overflow-y:auto !important;overflow-x:hidden !important;-webkit-overflow-scrolling:touch !important;max-height:100% !important;border-radius:12px !important;margin-bottom:0 !important;background:#fff !important;}"
         "/* Scrollbar styling */"
         ".help-content::-webkit-scrollbar{width:12px !important;background:#e0e0e0 !important;}"
         ".help-content::-webkit-scrollbar-track{background:#e0e0e0 !important;}"
