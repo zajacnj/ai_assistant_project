@@ -442,7 +442,7 @@ css_template = """
         background: var(--va-navy);
         color: white;
         padding: 1rem 2rem;
-  margin: -2rem 0 0 0;
+        margin: 0;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -536,36 +536,18 @@ css_template = """
     /* Task cards */
     .task-card {{
         background: white;
-        border-radius: 16px;
-        padding: 1.75rem;
+        border-radius: 15px;
+        padding: 1.5rem;
         margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
         border: 1px solid var(--va-gray-lighter);
-        transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }}
-
-    .task-card::before {{
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, var(--va-blue), var(--va-light-blue));
-        opacity: 0;
-        transition: opacity 0.28s ease;
+        transition: all 0.3s ease;
     }}
 
     .task-card:hover {{
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.08);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
         border-color: var(--va-blue);
-    }}
-
-    .task-card:hover::before {{
-        opacity: 1;
     }}
 
     .task-header {{
@@ -577,32 +559,22 @@ css_template = """
 
     .task-title {{
         color: var(--va-navy);
-        font-size: 1.25rem;
-        font-weight: 700;
+        font-size: 1.2rem;
+        font-weight: bold;
         margin: 0;
         flex: 1;
         line-height: 1.3;
-        transition: color 0.2s ease;
-    }}
-
-    .task-card:hover .task-title {{
-        color: var(--va-blue);
     }}
 
     .task-favorite {{
         font-size: 1.5rem;
         margin-left: 1rem;
-        transition: transform 0.2s ease;
-    }}
-
-    .task-favorite:hover {{
-        transform: scale(1.15);
     }}
 
     .task-description {{
         color: var(--va-gray);
         font-size: 0.95rem;
-        line-height: 1.6;
+        line-height: 1.5;
         margin-bottom: 1rem;
     }}
 
@@ -617,241 +589,19 @@ css_template = """
     .task-category {{
         background: var(--va-light-blue);
         color: var(--va-navy);
-        padding: 0.45rem 1.1rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
+        padding: 0.4rem 1rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: bold;
         text-transform: uppercase;
-        letter-spacing: 0.3px;
     }}
 
     .task-arrow {{
-        color: var(--va-blue);
-        font-size: 1.5rem;
-        font-weight: 600;
-        transition: transform 0.2s ease;
+        color: var(--va-navy);
+        font-size: 1.2rem;
     }}
 
-    .task-card:hover .task-arrow {{
-        transform: translateX(4px);
-    }}
-
-  /* Fade-in animation for task cards */
-  @keyframes fadeInUp {{
-    from {{
-      opacity: 0;
-      transform: translateY(20px);
-    }}
-    to {{
-      opacity: 1;
-      transform: translateY(0);
-    }}
-  }}
-
-  .task-card {{
-    animation: fadeInUp 0.4s ease-out backwards;
-  }}
-
-  .task-card:nth-child(1) {{ animation-delay: 0.05s; }}
-  .task-card:nth-child(2) {{ animation-delay: 0.1s; }}
-  .task-card:nth-child(3) {{ animation-delay: 0.15s; }}
-  .task-card:nth-child(4) {{ animation-delay: 0.2s; }}
-  .task-card:nth-child(5) {{ animation-delay: 0.25s; }}
-  .task-card:nth-child(6) {{ animation-delay: 0.3s; }}
-  .task-card:nth-child(7) {{ animation-delay: 0.35s; }}
-  .task-card:nth-child(8) {{ animation-delay: 0.4s; }}
-  .task-card:nth-child(9) {{ animation-delay: 0.45s; }}
-
-  /* Loading overlay & spinner */
-  .loading-overlay {{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,23,46,0.45);
-    backdrop-filter: blur(2px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .35s ease;
-  }}
-  .loading-overlay.visible {{
-    opacity: 1;
-    pointer-events: auto;
-  }}
-  .spinner {{
-    width: 56px;
-    height: 56px;
-    border: 6px solid rgba(255,255,255,0.35);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin .8s linear infinite;
-    box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
-  }}
-  @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
-
-  /* Screen reader only utility */
-  .sr-only {{
-    position: absolute;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0);
-    white-space: nowrap; border: 0;
-  }}
-
-  /* Focus styles for keyboard navigation */
-  .task-card:focus {{
-    outline: 3px solid var(--va-blue);
-    outline-offset: 2px;
-  }}
-  
-  /* Focus-visible for better keyboard UX (no outline on mouse click) */
-  .task-card:focus:not(:focus-visible) {{
-    outline: none;
-  }}
-  .task-card:focus-visible {{
-    outline: 3px solid var(--va-blue);
-    outline-offset: 2px;
-    box-shadow: 0 0 0 6px rgba(0,94,162,0.15);
-  }}
-  
-  button:focus-visible, a:focus-visible {{
-    outline: 2px solid var(--va-blue);
-    outline-offset: 2px;
-  }}
-  
-  .skip-link {{
-    position: absolute;left:10px;top:10px;padding:8px 14px;background:#fff;color:var(--va-navy);
-    border-radius:8px;font-weight:600;z-index:9999;text-decoration:none;transform:translateY(-120%);
-    transition: transform .2s ease, box-shadow .2s ease;
-  }}
-  .skip-link:focus {{
-    transform: translateY(0); box-shadow:0 4px 14px rgba(0,0,0,0.15);
-  }}
-  
-  /* Favorite star animation */
-  .favorite-star {{
-    display: inline-block;
-    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
-    cursor: pointer;
-  }}
-  .favorite-star:hover {{
-    transform: scale(1.2);
-  }}
-  .favorite-star:active {{
-    transform: scale(0.9);
-  }}
-  .favorite-star.favorited {{
-    color: #ffb700;
-    text-shadow: 0 0 8px rgba(255,183,0,0.4);
-  }}
-
-  /* Loading pulse for interactive buttons */
-  @keyframes pulseFade {{
-    0% {{ opacity: 1; }}
-    50% {{ opacity: .45; }}
-    100% {{ opacity: 1; }}
-  }}
-  .loading-pulse {{
-    animation: pulseFade 1.4s ease-in-out infinite;
-  }}
-
-  /* Skeleton card loader */
-  .task-card.skeleton {{
-    background: linear-gradient(135deg, #f1f4f8 0%, #e4e9ef 100%);
-    border: 1px solid #e0e6ec;
-    box-shadow: none;
-    position: relative;
-    overflow: hidden;
-  }}
-  .task-card.skeleton::before {{
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%);
-    animation: shimmer 1.6s linear infinite;
-  }}
-  @keyframes shimmer {{
-    0% {{ transform: translateX(-100%); }}
-    100% {{ transform: translateX(100%); }}
-  }}
-  .skeleton-line {{
-    height: 12px;
-    background: #d8dde3;
-    border-radius: 6px;
-    margin: 8px 0;
-    width: 100%;
-  }}
-  .skeleton-line.sm {{ height: 10px; width: 55%; }}
-  .skeleton-line.lg {{ height: 14px; width: 85%; }}
-
-  .task-card.skeleton .task-header-row,
-  .task-card.skeleton .task-meta,
-  .task-card.skeleton .task-description,
-  .task-card.skeleton .task-footer {{ visibility: hidden; }}
-
-  /* Back to top button */
-  #back-to-top {{
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: var(--va-navy);
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s, transform 0.2s;
-    z-index: 999;
-    text-decoration: none;
-    font-size: 1.5rem;
-    font-weight: 600;
-  }}
-
-  #back-to-top.visible {{
-    opacity: 1;
-    visibility: visible;
-  }}
-
-  #back-to-top:hover {{
-    transform: translateY(-4px);
-    background: var(--va-blue);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-  }}
-
-  /* Filter badge indicators */
-  .filter-badge {{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.25);
-    border: 1px solid rgba(255,255,255,0.4);
-    border-radius: 20px;
-    padding: 4px 12px 4px 8px;
-    font-size: 0.85rem;
-    color: white;
-    margin-left: 8px;
-  }}
-
-  .filter-badge-close {{
-    cursor: pointer;
-    opacity: 0.8;
-    font-weight: bold;
-    transition: opacity 0.2s;
-  }}
-
-  .filter-badge-close:hover {{
-    opacity: 1;
-  }}
-
-  /* ============ HELP PAGES ============ */
+    /* ============ HELP PAGES ============ */
     .help-wrapper {{
         min-height: 100vh;
         display: flex;
@@ -1028,31 +778,6 @@ css_template = """
     box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 0 0 0 rgba(0,123,255,0);
     }}
 
-    /* Accent bar for active */
-    .division-btn.active::before, .category-btn.active::before {{
-      content: '';
-      position: absolute;
-      left: -1px;
-      top: -1px;
-      bottom: -1px;
-      width: 4px;
-      border-radius: 12px 0 0 12px;
-      background: linear-gradient(180deg,var(--va-blue), var(--va-light-blue));
-    }}
-
-    /* zero count styling */
-    .division-btn.zero:not(.active), .category-btn.zero:not(.active) {{
-      opacity: .45;
-    }}
-    .division-btn.zero:not(.active):hover, .category-btn.zero:not(.active):hover {{
-      background: #fff;
-      border-color: var(--va-gray-lighter);
-      color: var(--va-gray);
-      transform: none;
-      box-shadow: none;
-      cursor: default;
-    }}
-
     .division-btn:hover, .category-btn:hover {{
     background: var(--va-light-blue);
     border-color: var(--va-blue);
@@ -1099,28 +824,6 @@ css_template = """
   .filter-rail::-webkit-scrollbar-thumb {{ background: var(--va-gray-lighter); border-radius: 6px; }}
   .filter-rail::-webkit-scrollbar-thumb:hover {{ background: var(--va-gray-light); }}
 
-  /* Smooth expand/collapse animation for details */
-  details > summary {{
-    transition: margin 0.15s ease;
-  }}
-  details[open] > summary {{
-    margin-bottom: 8px;
-  }}
-  details > div {{
-    overflow: hidden;
-    animation: slideDown 0.25s ease;
-  }}
-  @keyframes slideDown {{
-    from {{
-      opacity: 0;
-      transform: translateY(-8px);
-    }}
-    to {{
-      opacity: 1;
-      transform: translateY(0);
-    }}
-  }}
-
     /* Specific icon classes with base64 images */
     .vha-icon {{ {vha_icon_rule} }}
     .vba-icon {{ {vba_icon_rule} }}
@@ -1152,65 +855,6 @@ css_template = """
         .welcome-title {{ font-size: 2rem; }}
         .va-seal {{ width: 250px; height: 250px; }}
         .notice-container {{ padding: 2rem; margin: 0 1rem; }}
-        
-        /* Mobile: Stack task catalog layout */
-        .main-header.task-header {{
-            flex-direction: column !important;
-            gap: 12px !important;
-            padding: 12px !important;
-            margin-top: -1.5rem !important;
-        }}
-        .main-header .header-left,
-        .main-header .header-center,
-        .main-header .header-right {{
-            width: 100% !important;
-            justify-content: center !important;
-        }}
-        .main-header #task-header-controls {{
-            flex-wrap: wrap !important;
-            gap: 10px !important;
-        }}
-        .main-header #task-search-input {{
-            width: 100% !important;
-            max-width: 100% !important;
-        }}
-        .main-header #sort-select {{
-            width: 100% !important;
-        }}
-        
-        /* Mobile: Filter rail becomes collapsible top section */
-        .filter-rail {{
-            position: static !important;
-            max-height: none !important;
-            margin-bottom: 16px !important;
-            padding-right: 0 !important;
-        }}
-        
-        /* Mobile: Task cards full width */
-        .task-card {{
-            margin-bottom: 1.25rem !important;
-        }}
-        .task-title {{
-            font-size: 1.1rem !important;
-        }}
-        .task-description {{
-            font-size: 0.9rem !important;
-        }}
-    }}
-    
-    @media (max-width: 480px) {{
-        .task-card {{
-            padding: 1.25rem !important;
-        }}
-        .division-btn, .category-btn {{
-            font-size: 13px !important;
-            padding: 10px 12px !important;
-        }}
-        .btn-icon {{
-            width: 28px !important;
-            height: 28px !important;
-            background-size: 24px 24px !important;
-        }}
     }}
 </style>
 """
@@ -2411,14 +2055,6 @@ def show_help_page():
 
 def show_main_interface():
     """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
-    # Cached loader for all active tasks (unfiltered) to avoid repeated DB hits for counts
-    @st.cache_data(show_spinner=False, ttl=120)
-    def _cached_all_tasks():
-        try:
-            return load_tasks() or pd.DataFrame()
-        except Exception:
-            return pd.DataFrame()
-
     # Read query params early for header controls
     try:
         _qp = st.query_params
@@ -2429,7 +2065,6 @@ def show_main_interface():
     qp_q = _get_qp(_qp, "q") or ""
     qp_fav = _get_qp(_qp, "fav") or "0"
     qp_mine = _get_qp(_qp, "mine") or "0"
-    qp_sort = _get_qp(_qp, "sort") or "title_asc"
     try:
         qp_page = int(_get_qp(_qp, "p") or "1")
         if qp_page < 1:
@@ -2443,132 +2078,47 @@ def show_main_interface():
     search_value = _html.escape(qp_q)
     fav_checked = "checked" if qp_fav == "1" else ""
     mine_checked = "checked" if qp_mine == "1" else ""
-    # Build options for sort select
-    sort_options = [
-        ("title_asc", "Title A–Z"),
-        ("title_desc", "Title Z–A"),
-        ("fav", "Favorites First"),
-    ]
-    sort_select_html = '<select id="sort-select" style="height:38px;border-radius:8px;border:1px solid #dbe2ea;padding:0 10px;font-size:.95rem;">' + ''.join([
-        f"<option value='{val}' {'selected' if qp_sort==val else ''}>{label}</option>" for val,label in sort_options
-    ]) + '</select>'
-    # Build filter badges for active filters
-    filter_badges_html = ""
-    if qp_div != "All":
-        filter_badges_html += f'<span class="filter-badge" data-filter="div"><span>Division: {_html.escape(qp_div)}</span><span class="filter-badge-close" onclick="window.location.href=\'?page=main&div=All&cat={qp_cat}&q={qp_q}&fav={qp_fav}&mine={qp_mine}&sort={qp_sort}\'" aria-label="Remove division filter">×</span></span>'
-    if qp_cat != "All":
-        filter_badges_html += f'<span class="filter-badge" data-filter="cat"><span>Category: {_html.escape(qp_cat)}</span><span class="filter-badge-close" onclick="window.location.href=\'?page=main&div={qp_div}&cat=All&q={qp_q}&fav={qp_fav}&mine={qp_mine}&sort={qp_sort}\'" aria-label="Remove category filter">×</span></span>'
-    if qp_q:
-        filter_badges_html += f'<span class="filter-badge" data-filter="q"><span>Search: {_html.escape(qp_q)}</span><span class="filter-badge-close" onclick="window.location.href=\'?page=main&div={qp_div}&cat={qp_cat}&q=&fav={qp_fav}&mine={qp_mine}&sort={qp_sort}\'" aria-label="Clear search">×</span></span>'
-    
-    # Build header with VA branding using global .main-header styles (avoid iframe for consistency)
     header_html = (
-        '<div class="main-header task-header" role="banner">'
-        '<div class="header-logo" role="link" aria-label="VA AI Assistant – Task Catalog" tabindex="0" data-href="?page=main">'
-            '<div class="header-logo-icon" aria-hidden="true"></div>'
-            '<span>Task Catalog</span>'
+        '<div class="main-header task-header" style="display:flex;align-items:center;justify-content:space-between;">'
+        '<div class="header-left" style="display:flex;align-items:center;gap:16px;">'
+        '<div class="header-logo" style="display:flex;align-items:center;gap:10px;">'
+        '<div class="header-logo-icon"></div>'
+        '<span style="font-size:1.5rem;font-weight:600;color:#fff;">Task Catalog</span>'
+        '</div></div>'
+        '<div class="header-center" style="flex:1;display:flex;align-items:center;gap:18px;justify-content:center;">'
+        '<form id="task-header-controls" style="display:flex;align-items:center;gap:18px;margin:0;">'
+        f'<input type="text" id="task-search-input" placeholder="Search tasks..." value="{search_value}" style="height:38px;width:320px;border-radius:8px;border:1px solid #dbe2ea;padding:0 14px;font-size:1rem;" />'
+        f'<label style="display:flex;align-items:center;gap:6px;color:#fff;font-size:1rem;"><input type="checkbox" id="fav-toggle" {fav_checked} style="accent-color:#005ea2;" /> Favorites</label>'
+        f'<label style="display:flex;align-items:center;gap:6px;color:#fff;font-size:1rem;"><input type="checkbox" id="mine-toggle" {mine_checked} style="accent-color:#005ea2;" /> My Tasks</label>'
+        '<button id="create-task-btn" type="button" style="height:38px;padding:0 18px;border-radius:8px;background:#fff;color:#005ea2;font-weight:600;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.07);cursor:pointer;">Create Task</button>'
+        '</form>'
         '</div>'
-        '<div class="header-center">'
-          '<form id="task-header-controls" class="header-controls" role="search" aria-label="Task search and filters">'
-            f'<input type="text" id="task-search-input" class="task-search" placeholder="Search tasks..." value="{search_value}" aria-label="Search tasks" />'
-            + sort_select_html.replace('style="height:38px;','style="height:40px;').replace('<select','<select class="sort-select" aria-label="Sort tasks"') +
-            f'<label class="toggle-label" aria-label="Show favorites only"><input type="checkbox" id="fav-toggle" {fav_checked} class="toggle-checkbox fav-toggle" /> <span>★ Favorites</span></label>'
-            f'<label class="toggle-label" aria-label="Show my tasks only"><input type="checkbox" id="mine-toggle" {mine_checked} class="toggle-checkbox mine-toggle" /> <span>My Tasks</span></label>'
-            '<button id="create-task-btn" type="button" class="btn-create-task" aria-label="Create a new task">+ Create Task</button>'
-          '</form>'
-        '</div>'
-        '<div class="header-right" role="navigation" aria-label="Utility links">'
-          '<div id="task-count-announcer" aria-live="polite" role="status" class="sr-only"></div>'
-          '<a href="?page=help" class="help-home-icon util-icon" title="Help" aria-label="Help" data-nav="help">'
-            '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.01 17c-.74 0-1.34-.6-1.34-1.34 0-.74.6-1.34 1.34-1.34.74 0 1.34.6 1.34 1.34 0 .74-.6 1.34-1.34 1.34zM13.6 13.07c-.59.53-.76.86-.76 1.43h-2.1l-.01-.17c-.05-1.02.31-1.72 1.22-2.52.69-.6 1.11-1.01 1.11-1.72 0-.69-.46-1.19-1.34-1.19-.78 0-1.27.39-1.55 1.24l-1.94-.81c.54-1.59 1.74-2.47 3.52-2.47 2.03 0 3.44 1.29 3.44 3.09 0 1.38-.72 2.19-1.59 3.12z"></path></svg>'
-          '</a>'
-          '<a href="?page=welcome" class="help-home-icon util-icon" title="Home" aria-label="Home" data-nav="welcome">'
-            '<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true"><path d="M12 5.69l5 4.5V18a1 1 0 0 1-1 1h-3v-4H11v4H8a1 1 0 0 1-1-1v-7.81l5-4.5m0-2.19L3 12h3v8a3 3 0 0 0 3 3h4v-5h2v5h4 a3 3 0 0 0 3-3v-8h3L12 3.5z"></path></svg>'
-          '</a>'
+        '<div class="header-right" style="display:flex;align-items:center;gap:14px;">'
+        '<a href="?page=help" class="help-home-icon" title="Help" aria-label="Help" style="text-decoration:none;">'
+        '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true">'
+        '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.01 17c-.74 0-1.34-.6-1.34-1.34 0-.74.6-1.34 1.34-1.34.74 0 1.34.6 1.34 1.34 0 .74-.6 1.34-1.34 1.34zM13.6 13.07c-.59.53-.76.86-.76 1.43h-2.1l-.01-.17c-.05-1.02.31-1.72 1.22-2.52.69-.6 1.11-1.01 1.11-1.72 0-.69-.46-1.19-1.34-1.19-.78 0-1.27.39-1.55 1.24l-1.94-.81c.54-1.59 1.74-2.47 3.52-2.47 2.03 0 3.44 1.29 3.44 3.09 0 1.38-.72 2.19-1.59 3.12z"/>'
+        '</svg></a>'
+        '<a href="?page=welcome" class="help-home-icon" title="Home" aria-label="Home" style="text-decoration:none;">'
+        '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff" aria-hidden="true">'
+        '<path d="M12 5.69l5 4.5V18a1 1 0 0 1-1 1h-3v-4H11v4H8a1 1 0 0 1-1-1v-7.81l5-4.5m0-2.19L3 12h3v8a3 3 0 0 0 3 3h4v-5h2v5h4a3 3 0 0 0 3-3v-8h3L12 3.5z"/>'
+        '</svg></a>'
         '</div>'
         '</div>'
     )
-
     header_html += """
     <style>
-      /* Extracted header classes */
-  .task-header { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:8px 32px; margin-top:-2rem; }
-      .task-header .header-center { flex:1; display:flex; justify-content:center; }
-      .header-controls { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0; }
-      .task-search { height:40px; width:300px; max-width:100%; border-radius:6px; border:2px solid rgba(255,255,255,0.35); background:#fff; padding:0 16px; font-size:0.95rem; }
-      .task-search:focus { border-color:#ffc107; box-shadow:0 0 0 3px rgba(255,193,7,0.25); outline:none; }
-      .task-search::placeholder { color:#6b7280; }
-      .sort-select { height:40px !important; border-radius:8px; border:1px solid #dbe2ea; padding:0 10px; font-size:.95rem; background:#fff; }
-      .toggle-label { display:flex; align-items:center; gap:6px; color:#fff; font-size:0.85rem; white-space:nowrap; cursor:pointer; }
-      .toggle-checkbox { width:18px; height:18px; cursor:pointer; }
-      .fav-toggle { accent-color:#ffc107; }
-      .mine-toggle { accent-color:#73b3e7; }
-      .btn-create-task { height:40px; padding:0 20px; border-radius:6px; background:#ffc107; color:#003f72; font-weight:700; border:none; box-shadow:0 2px 6px rgba(0,0,0,0.25); cursor:pointer; font-size:0.85rem; }
-      .btn-create-task:hover { background:#ffb300; transform:translateY(-1px); box-shadow:0 4px 12px rgba(0,0,0,0.3); }
-      .header-right { display:flex; align-items:center; gap:14px; }
-  /* Utility icons styled like help page: subtle translucent circle, white glyph */
-  .util-icon { text-decoration:none; display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.15); color:#fff; transition:background .18s ease, transform .18s ease; }
-  .util-icon svg { fill:#ffffff !important; }
-  .util-icon:hover, .util-icon:focus { background:rgba(255,255,255,0.28); outline:none; transform:translateY(-1px); }
-      .header-logo { display:flex; align-items:center; gap:12px; font-size:1.25rem; font-weight:600; color:#fff; cursor:pointer; }
-      .header-logo:focus { outline:2px solid #ffc107; outline-offset:4px; }
-      .sr-only { position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden; }
-      @media (max-width:1200px){ .task-header { flex-wrap:wrap; padding:12px 16px; } .task-header .header-center { order:3; width:100%; justify-content:flex-start; } }
+      .main-header.task-header { margin-top:-2.25rem; }
+      #task-search-input::placeholder { color:#9aa3ad; opacity:1; }
+      #task-search-input { background:#f5f7fa; }
     </style>
     <script>
-      (function(){
-        // Accessible logo navigation
-        const logo = document.querySelector('.task-header .header-logo');
-        if(logo){
-          logo.addEventListener('click', ()=>{ const href=logo.getAttribute('data-href'); if(href) window.location.href=href; });
-          logo.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); const href=logo.getAttribute('data-href'); if(href) window.location.href=href; }});
-        }
-        // Navigation icons
-        document.querySelectorAll('.task-header .util-icon').forEach(a => {
-          a.addEventListener('click', e => { e.preventDefault(); window.location.href = a.getAttribute('href'); });
+      document.querySelectorAll('.task-header a').forEach(function(a){
+        a.addEventListener('click', function(ev){
+          try { ev.preventDefault(); window.location = this.getAttribute('href'); } catch(e) {}
         });
-        // Announcer update after task grid loads
-        function updateAnnouncer(){
-          try {
-            const announcer = document.getElementById('task-count-announcer');
-            if(!announcer) return;
-            const cards = document.querySelectorAll('.task-card');
-            const count = cards.length;
-            announcer.textContent = count + (count === 1 ? ' task available' : ' tasks available');
-          } catch(e) {}
-        }
-        // Initial attempt after DOM paint
-        setTimeout(updateAnnouncer, 350);
-        // Also observe mutations within main area
-        const mainEl = document.querySelector('main[aria-label="Task Catalog"]');
-        if(mainEl && 'MutationObserver' in window){
-          const mo = new MutationObserver(()=>{ updateAnnouncer(); });
-          mo.observe(mainEl, { childList:true, subtree:true });
-        }
-      })();
-    </script>
-    <div id="global-loading" class="loading-overlay" aria-hidden="true"><div class="spinner" role="status" aria-label="Loading"></div></div>
-    <script>
-      (function(){
-        const overlay = document.getElementById('global-loading');
-        function showLoading(){ overlay && overlay.classList.add('visible'); }
-        function hideLoading(){ overlay && overlay.classList.remove('visible'); }
-        const ids = ['task-search-input','sort-select','fav-toggle','mine-toggle'];
-        ids.forEach(id=>{
-          const el=document.getElementById(id);
-          if(!el) return;
-          if(id==='task-search-input'){
-            el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ showLoading(); } });
-          } else if(el.tagName==='SELECT' || el.type==='checkbox') {
-            el.addEventListener('change', showLoading);
-          }
-        });
-        window.addEventListener('beforeunload', showLoading);
-        setTimeout(hideLoading, 1500);
-      })();
+      });
     </script>
     """
-    # Inject header inline (reuse global CSS classes)
     st.markdown(header_html, unsafe_allow_html=True)
 
     def _safe_list(df, col, default_list):
@@ -2629,37 +2179,8 @@ def show_main_interface():
     # Layout: left filter rail (HTML buttons), right content
     rail, main = st.columns([1, 4])
     with rail:
-        st.markdown('<nav class="filter-rail" aria-label="Task Filters" role="navigation">', unsafe_allow_html=True)
-        # Compute counts per division/category from tasks (lightweight; uses load_tasks without filters)
-        try:
-            _all_tasks_df = _cached_all_tasks()
-        except Exception:
-            _all_tasks_df = pd.DataFrame()
-        div_counts = {}
-        cat_counts = {}
-        try:
-            if isinstance(_all_tasks_df, pd.DataFrame) and not _all_tasks_df.empty:
-                if 'division' in _all_tasks_df.columns:
-                    div_counts = _all_tasks_df['division'].fillna('Unknown').value_counts().to_dict()
-                if 'category' in _all_tasks_df.columns:
-                    cat_counts = _all_tasks_df['category'].fillna('Unknown').value_counts().to_dict()
-        except Exception:
-            pass
-        total_tasks_count = 0
-        try:
-            total_tasks_count = int(sum(div_counts.values())) if div_counts else int(len(_all_tasks_df))
-        except Exception:
-            pass
-
-        st.markdown('<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">\n'
-                    '<h3 style="margin:0;font-size:1.05rem;">Division</h3>'
-                    '<a href="?page=main&div=All&cat=All&q=&fav=0&mine=0" title="Reset all filters" aria-label="Clear all filters" style="font-size:0.75rem;text-decoration:none;color:var(--va-blue);">Clear</a>'
-                    '</div>', unsafe_allow_html=True)
-        st.markdown('<details open id="divisions-section" aria-expanded="true" style="margin-bottom:6px;">\n<summary style="cursor:pointer;font-weight:600;color:var(--va-gray);list-style:none;" title="Click to expand/collapse">'
-                    '<span style="user-select:none;">Divisions</span></summary><div>', unsafe_allow_html=True)
-        # Inline division filter
-        st.markdown('<input id="div-filter-input" type="text" placeholder="Filter divisions..." title="Type to filter divisions" aria-label="Filter divisions" '
-                    'style="width:100%;padding:6px 10px;margin:4px 0 10px;border:1px solid var(--va-gray-lighter);border-radius:8px;font-size:12px;" />', unsafe_allow_html=True)
+        st.markdown('<div class="filter-rail">', unsafe_allow_html=True)
+        st.markdown("### Division")
         items = [
             ("All", ""),
             ("VHA", "vha-icon"),
@@ -2671,26 +2192,10 @@ def show_main_interface():
             active = " active" if (qp_div == label) else ""
             href = f"?page=main&div={label}&cat={qp_cat}"
             icon = f"<div class='btn-icon {icon_cls}'></div>" if icon_cls else "<div class='btn-icon'></div>"
-            if label == 'All':
-                cval = total_tasks_count
-            else:
-                cval = div_counts.get(label, 0)
-            count_badge = f"<span style='margin-left:auto;background:var(--va-gray-lightest);padding:2px 8px;border-radius:16px;font-size:11px;color:var(--va-gray);font-weight:600;'>{cval}</span>"
-            zero_cls = ' zero' if (label != 'All' and cval == 0) else ''
-            div_html.append(f"<a class='division-btn{active}{zero_cls}' data-label='{label.lower()}' href='{href}'>{icon}<span>{label}</span>{count_badge}</a>")
+            div_html.append(f"<a class='division-btn{active}' href='{href}'>{icon}<span>{label}</span></a>")
         st.markdown("\n".join(div_html), unsafe_allow_html=True)
-        st.markdown('</div></details>', unsafe_allow_html=True)
 
-        cat_clear_href = f"?page=main&div={qp_div}&cat=All&q={qp_q}&fav={qp_fav}&mine={qp_mine}"
-        st.markdown('<div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 4px;">\n'
-                    '<h3 style="margin:0;font-size:1.05rem;">Category</h3>'
-                    f'<a href="{cat_clear_href}" title="Reset category" aria-label="Clear category filter" style="font-size:0.7rem;text-decoration:none;color:var(--va-blue);">Clear</a>'
-                    '</div>', unsafe_allow_html=True)
-        st.markdown('<details open id="categories-section" aria-expanded="true" style="margin-bottom:6px;">\n<summary style="cursor:pointer;font-weight:600;color:var(--va-gray);list-style:none;" title="Click to expand/collapse">'
-                    '<span style="user-select:none;">Categories</span></summary><div>', unsafe_allow_html=True)
-        # Inline search input for client-side filtering
-        st.markdown('<input id="cat-filter-input" type="text" placeholder="Filter categories..." title="Type to filter categories" aria-label="Filter categories" '
-                    'style="width:100%;padding:6px 10px;margin:4px 0 10px;border:1px solid var(--va-gray-lighter);border-radius:8px;font-size:12px;" />', unsafe_allow_html=True)
+        st.markdown("### Category")
         cat_map = [
             ("All", ""),
             ("Administrative", "administrative-icon"),
@@ -2709,158 +2214,38 @@ def show_main_interface():
             active = " active" if (qp_cat == label) else ""
             href = f"?page=main&div={qp_div}&cat={label}"
             icon = f"<div class='btn-icon {icon_cls}'></div>" if icon_cls else "<div class='btn-icon'></div>"
-            if label == 'All':
-                cval = total_tasks_count
-            else:
-                cval = cat_counts.get(label, 0)
-            count_badge = f"<span style='margin-left:auto;background:var(--va-gray-lightest);padding:2px 8px;border-radius:16px;font-size:11px;color:var(--va-gray);font-weight:600;'>{cval}</span>"
-            zero_cls = ' zero' if (label != 'All' and cval == 0) else ''
-            cat_html.append(f"<a class='category-btn{active}{zero_cls}' data-label='{label.lower()}' href='{href}'>{icon}<span>{label}</span>{count_badge}</a>")
+            cat_html.append(f"<a class='category-btn{active}' href='{href}'>{icon}<span>{label}</span></a>")
         st.markdown("\n".join(cat_html), unsafe_allow_html=True)
-        st.markdown('</div></details>', unsafe_allow_html=True)
-        st.markdown(
-            """
-            <script>
-            (function(){
-              const ids=['divisions-section','categories-section'];
-              ids.forEach(id=>{
-                const el=document.getElementById(id);
-                if(!el) return;
-                const key='navsec_'+id;
-                try {
-                  const saved=localStorage.getItem(key);
-                  if(saved==='closed') el.removeAttribute('open');
-                } catch(e){}
-                el.addEventListener('toggle', ()=>{
-                  try { localStorage.setItem(key, el.open ? 'open':'closed'); } catch(e){}
-                });
-              });
-              // Client-side category filtering
-              const filterInput=document.getElementById('cat-filter-input');
-              if(filterInput){
-                filterInput.addEventListener('input', function(){
-                  const term=this.value.trim().toLowerCase();
-                  document.querySelectorAll('.category-btn').forEach(btn=>{
-                    const label=btn.getAttribute('data-label')||'';
-                    btn.style.display = (!term || label.includes(term)) ? 'flex' : 'none';
-                  });
-                });
-              }
-              // Client-side division filtering
-              const divFilterInput=document.getElementById('div-filter-input');
-              if(divFilterInput){
-                divFilterInput.addEventListener('input', function(){
-                  const term=this.value.trim().toLowerCase();
-                  document.querySelectorAll('.division-btn').forEach(btn=>{
-                    const label=btn.getAttribute('data-label')||'';
-                    btn.style.display = (!term || label.includes(term)) ? 'flex' : 'none';
-                  });
-                });
-              }
-            })();
-            </script>
-            """,
-            unsafe_allow_html=True
-        )
-        st.markdown('</nav>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with main:
-        st.markdown('<main role="main" aria-label="Task Catalog">', unsafe_allow_html=True)
         # Controls now in header bar; wire up via JS
         search_term = qp_q
         show_favorites = (qp_fav == "1")
         my_tasks = (qp_mine == "1")
         st.markdown(
             '''<script>
-            (function() {
-              // Debounced search input (400ms delay)
-              let searchTimeout = null;
-              const searchInput = document.getElementById('task-search-input');
-              if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                  clearTimeout(searchTimeout);
-                  const val = this.value;
-                  searchTimeout = setTimeout(() => {
-                    const qp = new URLSearchParams(window.location.search);
-                    qp.set('q', val);
-                    qp.set('p', '1'); // Reset to first page on search
-                    window.location.search = qp.toString();
-                  }, 400);
-                });
-                // Still support Enter for immediate search
-                searchInput.addEventListener('keydown', function(e) {
-                  if (e.key === 'Enter') {
-                    clearTimeout(searchTimeout);
-                    const qp = new URLSearchParams(window.location.search);
-                    qp.set('q', this.value);
-                    qp.set('p', '1');
-                    window.location.search = qp.toString();
-                  }
-                });
-              }
-              
-              // Filter checkboxes
-              const favToggle = document.getElementById('fav-toggle');
-              if (favToggle) {
-                favToggle.addEventListener('change', function() {
-                  const qp = new URLSearchParams(window.location.search);
-                  qp.set('fav', this.checked ? '1' : '0');
-                  qp.set('p', '1');
-                  window.location.search = qp.toString();
-                });
-              }
-              
-              const mineToggle = document.getElementById('mine-toggle');
-              if (mineToggle) {
-                mineToggle.addEventListener('change', function() {
-                  const qp = new URLSearchParams(window.location.search);
-                  qp.set('mine', this.checked ? '1' : '0');
-                  qp.set('p', '1');
-                  window.location.search = qp.toString();
-                });
-              }
-              
-              // Sort dropdown
-              const sortSel = document.getElementById('sort-select');
-              if (sortSel){
-                sortSel.addEventListener('change', function(){
-                  const qp = new URLSearchParams(window.location.search);
-                  qp.set('sort', this.value);
-                  qp.set('p','1');
-                  window.location.search = qp.toString();
-                });
-              }
-              
-              // Create task button
-              const createBtn = document.getElementById('create-task-btn');
-              if (createBtn) {
-                createBtn.addEventListener('click', function() {
-                  const qp = new URLSearchParams(window.location.search);
-                  qp.set('page', 'edit_task');
-                  window.location.search = qp.toString();
-                });
-              }
-              
-              // Keyboard shortcuts
-              document.addEventListener('keydown', function(e) {
-                // Focus search with /
-                if (e.key === '/' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
-                  e.preventDefault();
-                  document.getElementById('task-search-input')?.focus();
-                }
-                // Clear search with Escape
-                if (e.key === 'Escape') {
-                  const search = document.getElementById('task-search-input');
-                  if (search && search === document.activeElement && search.value) {
-                    search.value = '';
-                    clearTimeout(searchTimeout);
-                    const qp = new URLSearchParams(window.location.search);
-                    qp.set('q', '');
-                    window.location.search = qp.toString();
-                  }
-                }
-              });
-            })();
+            document.getElementById('task-search-input').addEventListener('change', function() {
+              const val = this.value;
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('q', val);
+              window.location.search = qp.toString();
+            });
+            document.getElementById('fav-toggle').addEventListener('change', function() {
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('fav', this.checked ? '1' : '0');
+              window.location.search = qp.toString();
+            });
+            document.getElementById('mine-toggle').addEventListener('change', function() {
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('mine', this.checked ? '1' : '0');
+              window.location.search = qp.toString();
+            });
+            document.getElementById('create-task-btn').addEventListener('click', function() {
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('page', 'edit_task');
+              window.location.search = qp.toString();
+            });
             </script>''', unsafe_allow_html=True)
 
         # keep URL in sync with current controls
@@ -2872,7 +2257,6 @@ def show_main_interface():
                 "q": search_term or "",
                 "fav": "1" if show_favorites else "0",
                 "mine": "1" if my_tasks else "0",
-                "sort": qp_sort,
                 "p": str(qp_page),
             })
         except Exception:
@@ -2880,18 +2264,6 @@ def show_main_interface():
 
         # Fetch tasks safely
         tasks = load_tasks(division=qp_div, category=qp_cat, search_term=search_term, show_favorites=show_favorites)
-        # Apply sort preference
-        try:
-            if isinstance(tasks, pd.DataFrame) and not tasks.empty:
-                if qp_sort == 'title_asc' and 'title' in tasks.columns:
-                    tasks = tasks.sort_values('title', kind='stable')
-                elif qp_sort == 'title_desc' and 'title' in tasks.columns:
-                    tasks = tasks.sort_values('title', ascending=False, kind='stable')
-                elif qp_sort == 'fav' and 'is_favorite' in tasks.columns:
-                    # favorites first, then title
-                    tasks = tasks.sort_values(['is_favorite','title' if 'title' in tasks.columns else tasks.columns[0]], ascending=[False, True], kind='stable')
-        except Exception:
-            pass
         # Additional client-side filters (robust to missing columns)
         try:
             if search_term:
@@ -2917,13 +2289,14 @@ def show_main_interface():
                         break
         except Exception:
             pass
-        
-        # Check if empty after all filters
-        display_empty_state = False
         if tasks is None or not isinstance(tasks, pd.DataFrame) or tasks.empty:
-            display_empty_state = True
-            # Create a minimal placeholder to prevent downstream errors
-            tasks = pd.DataFrame([{"title":"","task_description":"","division":"","category":"","is_favorite":0,"task_id":""}])
+            # Provide a few sample cards when DB has no rows
+            tasks = pd.DataFrame([
+                {"title":"Meeting Minutes","task_description":"Create meeting minutes from a transcript","division":"Administrative","category":"Management","is_favorite":1},
+                {"title":"Ambient Dictation","task_description":"Generate outpatient clinic notes from a transcript","division":"Medical","category":"Documentation","is_favorite":0},
+                {"title":"Market Pay Review","task_description":"Comprehensive market pay review summary","division":"Human Resources","category":"Compensation","is_favorite":0},
+                {"title":"Benefits Claim Status","task_description":"Professional letter updating a veteran","division":"Public Affairs","category":"Communication","is_favorite":0},
+            ])
 
         # Ensure task_id column present for links/toggles
         if "task_id" not in tasks.columns:
@@ -2941,10 +2314,25 @@ def show_main_interface():
         page_df = tasks.iloc[start:end]
 
         # Grid of cards (3 per row)
-        st.markdown('<span id="task-grid-start" class="sr-only" aria-hidden="true"></span>', unsafe_allow_html=True)
         st.markdown("\n")
+        # Install JS helper for instant favorite toggle (no full page reload)
+        st.markdown(
+            """
+            <script>
+            window.vaFavToggle = async function(tid, el){
+              try{
+                el.style.opacity = 0.4;
+                await fetch('?api=favt&task=' + encodeURIComponent(tid), {credentials:'same-origin'});
+                el.textContent = (el.textContent.trim() === '★') ? '☆' : '★';
+              }catch(e){ console.warn('toggle fav failed', e); }
+              finally{ el.style.opacity = 1; }
+            };
+            </script>
+            """,
+            unsafe_allow_html=True,
+        )
 
-        # Define base_params early for use in all branches
+        cols = st.columns(3, gap="large")
         base_params = {
             "page": "main",
             "div": qp_div,
@@ -2952,183 +2340,56 @@ def show_main_interface():
             "q": search_term or "",
             "fav": "1" if show_favorites else "0",
             "mine": "1" if my_tasks else "0",
-            "sort": qp_sort,
             "p": str(qp_page),
         }
-
-        if display_empty_state:
-            # Show friendly empty state instead of sample cards
-            st.markdown(
-                """
-                <div style='text-align:center;padding:80px 20px;'>
-                  <svg viewBox='0 0 24 24' width='72' height='72' fill='var(--va-gray-light)' style='margin-bottom:24px;'>
-                    <path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z'/>
-                  </svg>
-                  <h3 style='color:var(--va-gray);margin:0 0 12px;font-size:1.4rem;'>No tasks match your filters</h3>
-                  <p style='color:var(--va-gray-light);margin:0 0 24px;font-size:0.95rem;'>Try clearing filters or creating a new task to get started.</p>
-                  <div style='display:flex;justify-content:center;gap:14px;flex-wrap:wrap;'>
-                    <a href='?page=main&div=All&cat=All&q=&fav=0&mine=0&sort=title_asc' style='padding:10px 18px;border-radius:8px;background:var(--va-light-blue);color:var(--va-navy);text-decoration:none;font-weight:600;'>Clear Filters</a>
-                    <a href='?page=main&div=All&cat=All&sort=title_asc' style='padding:10px 18px;border-radius:8px;background:#fff;color:var(--va-navy);text-decoration:none;font-weight:600;border:1px solid var(--va-gray-lighter);'>Browse All</a>
-                    <a href='?page=edit_task' style='padding:10px 18px;border-radius:8px;background:var(--va-navy);color:#fff;text-decoration:none;font-weight:600;'>Create Task</a>
+        for i, (_, task) in enumerate(page_df.iterrows()):
+            c = cols[i % 3]
+            with c:
+                tid = str(task.get("task_id", ""))
+                # normalize star glyphs for favorite toggle
+                fav_star = '★' if int(task.get('is_favorite',0)) else '☆'
+                fav_href = "?" + urlencode(dict(base_params, favt=tid))
+                details_href = "?" + urlencode(dict(base_params, page="task", task=tid))
+                html = f"""
+                <div class='task-card'>
+                  <div class='task-header'>
+                    <h4 class='task-title'><a href='{details_href}' target='_self' style='text-decoration:none;color:inherit;'>{task.get('title','Untitled')}</a></h4>
+                    <div class='task-favorite'>
+                      <a href='{fav_href}' onclick="event.preventDefault(); window.vaFavToggle('{tid}', this);" title='Toggle favorite' style='text-decoration:none;color:inherit;'>{fav_star}</a>
+                    </div>
+                  </div>
+                  <div class='task-description'>{task.get('task_description','')}</div>
+                  <div class='task-footer'>
+                    <span class='task-category'>{task.get('category','')}</span>
+                    <span class='task-arrow'><a href='{details_href}' target='_self' style='text-decoration:none;color:inherit;'>›</a></span>
                   </div>
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
-        else:
-            # Install JS helper for instant favorite toggle (no full page reload)
-            st.markdown(
                 """
-                <script>
-                window.vaFavToggle = async function(tid, el){
-                  try{
-                    // Add visual feedback
-                    el.classList.add('favorite-star');
-                    el.style.opacity = 0.4;
-                    
-                    await fetch('?api=favt&task=' + encodeURIComponent(tid), {credentials:'same-origin'});
-                    
-                    const isFav = el.textContent.trim() === '★';
-                    el.textContent = isFav ? '☆' : '★';
-                    // Update aria-pressed
-                    el.setAttribute('aria-pressed', isFav ? 'false' : 'true');
-                    
-                    // Toggle favorited class for styling
-                    if (isFav) {
-                      el.classList.remove('favorited');
-                    } else {
-                      el.classList.add('favorited');
-                    }
-                    // Announce to screen reader
-                    try {
-                      const announcer = document.getElementById('task-count-announcer');
-                      if (announcer) {
-                        announcer.textContent = 'Task ' + tid + (isFav ? ' removed from favorites.' : ' added to favorites.');
-                      }
-                    } catch(e){}
-                  }catch(e){ console.warn('toggle fav failed', e); }
-                  finally{ el.style.opacity = 1; }
-                };
-                </script>
-                """,
-                unsafe_allow_html=True,
-            )
-
-            cols = st.columns(3, gap="large")
-      # Render task cards
-            for i, (_, task) in enumerate(page_df.iterrows()):
-                c = cols[i % 3]
-                with c:
-                    tid = str(task.get("task_id", ""))
-                    # normalize star glyphs for favorite toggle
-                    is_fav = int(task.get('is_favorite',0))
-                    fav_star = '★' if is_fav else '☆'
-                    fav_class = 'favorite-star favorited' if is_fav else 'favorite-star'
-                    fav_href = "?" + urlencode(dict(base_params, favt=tid))
-                    details_href = "?" + urlencode(dict(base_params, page="task", task=tid))
-                    html = f"""
-                    <div class='task-card' role='article' aria-label='{task.get('title','Untitled')}' tabindex='0'>
-                      <div class='task-header'>
-                        <h4 class='task-title'><a href='{details_href}' target='_self' style='text-decoration:none;color:inherit;'>{task.get('title','Untitled')}</a></h4>
-                        <div class='task-favorite'>
-                          <a href='{fav_href}' onclick="event.preventDefault(); window.vaFavToggle('{tid}', this);" class='{fav_class}' title='Toggle favorite' aria-label='Toggle favorite' aria-pressed={'true' if is_fav else 'false'} style='text-decoration:none;color:inherit;'>{fav_star}</a>
-                        </div>
-                      </div>
-                      <div class='task-description'>{task.get('task_description','')}</div>
-                      <div class='task-footer'>
-                        <span class='task-category'>{task.get('category','')}</span>
-                        <span class='task-arrow'><a href='{details_href}' target='_self' style='text-decoration:none;color:inherit;'>›</a></span>
-                      </div>
-                    </div>
-                    """
-                    # Polish: nicer chevron for task link
-                    try:
-                        html = html.replace("color:inherit;'>></a>", "color:inherit;'>›</a>")
-                    except Exception:
-                        pass
-                    st.markdown(html, unsafe_allow_html=True)
-        
-        # Inject accessibility JS for details aria-expanded and keyboard navigation
-        st.markdown("""
-        <script>
-        (function(){
-          // Update aria-expanded on details toggle
-          document.querySelectorAll('details').forEach(d => {
-            d.addEventListener('toggle', () => {
-              d.setAttribute('aria-expanded', d.open ? 'true' : 'false');
-            });
-          });
-          // Keyboard grid navigation
-          const cards = Array.from(document.querySelectorAll('.task-card'));
-          const cols = 3;
-          function focusIndex(i){ if(i>=0 && i<cards.length){ cards[i].focus(); } }
-          cards.forEach((card, idx) => {
-            card.addEventListener('keydown', e => {
-              let handled=false; let targetIdx=idx;
-              switch(e.key){
-                case 'ArrowRight': if((idx % cols) < cols-1) targetIdx = idx+1; handled=true; break;
-                case 'ArrowLeft': if((idx % cols) > 0) targetIdx = idx-1; handled=true; break;
-                case 'ArrowDown': if(idx + cols < cards.length) targetIdx = idx+cols; handled=true; break;
-                case 'ArrowUp': if(idx - cols >= 0) targetIdx = idx-cols; handled=true; break;
-                case 'Home': targetIdx = 0; handled=true; break;
-                case 'End': targetIdx = cards.length-1; handled=true; break;
-                case 'Enter':
-                  const link = card.querySelector('.task-title a');
-                  if(link){ link.click(); handled=true; }
-                  break;
-              }
-              if(handled){ e.preventDefault(); focusIndex(targetIdx); }
-            });
-          });
-          // Announce task count
-          const announcer = document.getElementById('task-count-announcer');
-          if(announcer){ announcer.textContent = cards.length + ' task' + (cards.length===1?'':'s') + ' loaded.'; }
-        })();
-        </script>
-        """, unsafe_allow_html=True)
+                # Polish: nicer chevron for task link
+                try:
+                    html = html.replace("color:inherit;'>></a>", "color:inherit;'>›</a>")
+                except Exception:
+                    pass
+                st.markdown(html, unsafe_allow_html=True)
 
         # Pagination controls
-        st.markdown('<div style="margin-top:2rem;"></div>', unsafe_allow_html=True)
-        st.markdown('<nav aria-label="Pagination navigation" role="navigation">', unsafe_allow_html=True)
-        nav_cols = st.columns([1,3,1])
+        nav_cols = st.columns([1,2,1])
         with nav_cols[0]:
-            if qp_page > 1 and st.button('◀ Prev', use_container_width=True, key='prev-btn', help=f'Go to page {qp_page-1}'):
+            if qp_page > 1 and st.button('◀ Prev', use_container_width=True):
                 try:
                     st.query_params.update(dict(base_params, p=str(qp_page-1)))
                 except Exception:
                     pass
                 st.rerun()
         with nav_cols[1]:
-            # Enhanced pagination display with page jump
-            pag_col1, pag_col2, pag_col3 = st.columns([2,1,2])
-            with pag_col1:
-                # Page jump form
-                try:
-                    with st.form(key='page-jump-form'):
-                        pj = st.number_input('Jump to page', min_value=1, max_value=total_pages, value=qp_page, label_visibility='collapsed', key='page-jump-input')
-                        submitted = st.form_submit_button('Go', use_container_width=True)
-                        if submitted and pj != qp_page:
-                            try:
-                                st.query_params.update(dict(base_params, p=str(int(pj))))
-                            except Exception:
-                                pass
-                            st.rerun()
-                except Exception:
-                    st.write("")
-            with pag_col2:
-                st.markdown(f"<div style='text-align:center;padding:8px;background:var(--va-light-blue);border-radius:8px;font-weight:600;color:var(--va-navy);' role='status' aria-label='Currently on page {qp_page} of {total_pages}'>Page {qp_page} of {total_pages}</div>", unsafe_allow_html=True)
-            with pag_col3:
-                st.write("")
+            st.write(f"Page {qp_page} of {total_pages}")
         with nav_cols[2]:
-            if qp_page < total_pages and st.button('Next ▶', use_container_width=True, key='next-btn', help=f'Go to page {qp_page+1}'):
+            if qp_page < total_pages and st.button('Next ▶', use_container_width=True):
                 try:
                     st.query_params.update(dict(base_params, p=str(qp_page+1)))
                 except Exception:
                     pass
                 st.rerun()
-        st.markdown('</nav>', unsafe_allow_html=True)
-
-        # (Removed skeleton cleanup in revert)
 
         # Optional debug table
         if st.checkbox("Show raw tasks data", False):
@@ -3176,35 +2437,6 @@ def show_main_interface():
                 </div>
                 """
                 components_html_with_css(modal_html, height=200, scrolling=False)
-
-    # Back to top button
-    back_to_top_html = """
-    <a href="#" id="back-to-top" title="Back to top" aria-label="Back to top">↑</a>
-    <script>
-      (function() {
-        var btn = document.getElementById('back-to-top');
-        if (!btn) return;
-        
-        function toggleBackToTop() {
-          if (window.pageYOffset > 300) {
-            btn.classList.add('visible');
-          } else {
-            btn.classList.remove('visible');
-          }
-        }
-        
-        window.addEventListener('scroll', toggleBackToTop);
-        toggleBackToTop(); // Check initial state
-        
-        btn.addEventListener('click', function(e) {
-          e.preventDefault();
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-      })();
-    </script>
-    </main>
-    """
-    st.markdown(back_to_top_html, unsafe_allow_html=True)
 
 def show_task_page():
     """Dedicated task details page with actions (opened from the grid)."""
