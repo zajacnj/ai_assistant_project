@@ -2034,14 +2034,28 @@ def show_main_interface():
     """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
 
     # Top navy header (parity with Help page header). Placed first so filters render beneath.
-    st.markdown(
-        """
+  import json as _json_for_header
+  _qpq_js = _json_for_header.dumps(qp_q)
+  st.markdown(
+    f"""
         <div class="main-header task-header" style="display:flex;align-items:center;justify-content:space-between;">
           <div class="header-left" style="display:flex;align-items:center;gap:16px;">
             <div class="header-logo" style="display:flex;align-items:center;gap:10px;">
               <div class="header-logo-icon"></div>
               <span style="font-size:1.5rem;font-weight:600;color:#fff;">Task Catalog</span>
             </div>
+          </div>
+          <div class="header-center" style="flex:1;display:flex;align-items:center;gap:18px;justify-content:center;">
+            <form id="task-header-controls" style="display:flex;align-items:center;gap:18px;margin:0;">
+              <input type="text" id="task-search-input" placeholder="Search tasks..." value="" style="height:38px;width:320px;border-radius:8px;border:1px solid #dbe2ea;padding:0 14px;font-size:1rem;" />
+              <label style="display:flex;align-items:center;gap:6px;color:#fff;font-size:1rem;">
+                <input type="checkbox" id="fav-toggle" {'checked' if qp_fav == '1' else ''} style="accent-color:#005ea2;" /> Favorites
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;color:#fff;font-size:1rem;">
+                <input type="checkbox" id="mine-toggle" {'checked' if qp_mine == '1' else ''} style="accent-color:#005ea2;" /> My Tasks
+              </label>
+              <button id="create-task-btn" type="button" style="height:38px;padding:0 18px;border-radius:8px;background:#fff;color:#005ea2;font-weight:600;border:none;box-shadow:0 1px 4px rgba(0,0,0,0.07);cursor:pointer;">Create Task</button>
+            </form>
           </div>
           <div class="header-right" style="display:flex;align-items:center;gap:14px;">
             <a href='?page=help' class='help-home-icon' title='Help' aria-label='Help' style='text-decoration:none;'>
@@ -2057,7 +2071,9 @@ def show_main_interface():
           </div>
         </div>
         <style>
-          .main-header.task-header { margin-top:-2.5rem; }
+          .main-header.task-header { margin-top:-2.25rem; }
+          #task-search-input::placeholder { color:#9aa3ad; opacity:1; }
+          #task-search-input { background:#f5f7fa; }
         </style>
         <script>
         // Ensure same-tab navigation (defensive; Streamlit normally does this already)
@@ -2066,8 +2082,13 @@ def show_main_interface():
             try { ev.preventDefault(); window.location = this.getAttribute('href'); } catch(e) {}
           });
         });
-        </script>
-        """,
+        try {
+          const qpVal = %s; // injected below via Python formatting
+          const inp = document.getElementById('task-search-input');
+          if(inp && qpVal){ inp.value = qpVal; }
+        } catch(e) {}
+    </script>
+    """ % _qpq_js,
         unsafe_allow_html=True,
     )
 
@@ -2187,17 +2208,34 @@ def show_main_interface():
         st.markdown("\n".join(cat_html), unsafe_allow_html=True)
 
     with main:
-        top = st.columns([4, 1, 1, 1])
-        with top[0]:
-            search_term = st.text_input("Search tasks and prompts...", value=qp_q, key="task_search_main")
-        with top[1]:
-            show_favorites = st.toggle("Favorites", value=(qp_fav == "1"), key="fav_toggle")
-        with top[2]:
-            my_tasks = st.toggle("My Tasks", value=(qp_mine == "1"), key="mine_toggle")
-        with top[3]:
-            if st.button("+ Create Task"):
-                st.session_state.current_page = "edit_task"
-                st.rerun()
+        # Controls now in header bar; wire up via JS
+        search_term = qp_q
+        show_favorites = (qp_fav == "1")
+        my_tasks = (qp_mine == "1")
+        st.markdown(
+            '''<script>
+            document.getElementById('task-search-input').addEventListener('change', function() {
+              const val = this.value;
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('q', val);
+              window.location.search = qp.toString();
+            });
+            document.getElementById('fav-toggle').addEventListener('change', function() {
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('fav', this.checked ? '1' : '0');
+              window.location.search = qp.toString();
+            });
+            document.getElementById('mine-toggle').addEventListener('change', function() {
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('mine', this.checked ? '1' : '0');
+              window.location.search = qp.toString();
+            });
+            document.getElementById('create-task-btn').addEventListener('click', function() {
+              const qp = new URLSearchParams(window.location.search);
+              qp.set('page', 'edit_task');
+              window.location.search = qp.toString();
+            });
+            </script>''', unsafe_allow_html=True)
 
         # keep URL in sync with current controls
         try:
