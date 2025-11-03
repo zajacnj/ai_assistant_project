@@ -1507,7 +1507,7 @@ def show_help_page():
         <button id='help-prev' title='Previous result'>◀</button>
         <button id='help-next' title='Next result'>▶</button>
       </div>
-      <a href='#' class='help-home-icon' id='help-home-server' title='Go to Welcome' aria-label='Go to Welcome'>
+      <a href='?page=welcome' class='help-home-icon' id='help-home-server' title='Go to Welcome' aria-label='Go to Welcome'>
         <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
           <path d='M12 3.1 2 12h2.8v8h5.6v-5.2h3.2V20h5.6v-8H22L12 3.1zm0 2.4 6.4 5.6h-2v8h-3.2v-5.2H10.8V19H7.6v-8h-2L12 5.5z'></path>
         </svg>
@@ -1515,20 +1515,22 @@ def show_help_page():
     </div>
     <script>
       (function(){
-        // Home icon server navigation
         const home = document.getElementById('help-home-server');
-        if (home && !home.__bound) {
-          home.__bound = true;
+        if (home && !home.__sameTabBound){
+          home.__sameTabBound = true;
+          // Remove any accidental target attribute
+          home.removeAttribute('target');
           home.addEventListener('click', function(e){
             e.preventDefault();
             try {
               const base = window.location.href.split('?')[0];
               window.location.href = base + '?page=welcome';
-            } catch(_){ }
+            } catch(_){ window.location.search='?page=welcome'; }
           });
         }
       })();
     </script>
+    <!-- Home icon uses direct href navigation -->
     """
     st.markdown(header_html, unsafe_allow_html=True)
 
@@ -2030,6 +2032,44 @@ def show_help_page():
 
 def show_main_interface():
     """Tasks UI modeled after scrTasks.png; resilient if DB is empty/missing columns."""
+
+    # Top navy header (parity with Help page header). Placed first so filters render beneath.
+    st.markdown(
+        """
+        <div class="main-header task-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="header-left" style="display:flex;align-items:center;gap:16px;">
+            <div class="header-logo" style="display:flex;align-items:center;gap:10px;">
+              <div class="header-logo-icon"></div>
+              <span style="font-size:1.5rem;font-weight:600;color:#fff;">Task Catalog</span>
+            </div>
+          </div>
+          <div class="header-right" style="display:flex;align-items:center;gap:14px;">
+            <a href='?page=help' class='help-home-icon' title='Help' aria-label='Help' style='text-decoration:none;'>
+              <svg viewBox='0 0 24 24' width='22' height='22' fill='#fff' aria-hidden='true'>
+                <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm.01 17c-.74 0-1.34-.6-1.34-1.34 0-.74.6-1.34 1.34-1.34.74 0 1.34.6 1.34 1.34 0 .74-.6 1.34-1.34 1.34zM13.6 13.07c-.59.53-.76.86-.76 1.43h-2.1l-.01-.17c-.05-1.02.31-1.72 1.22-2.52.69-.6 1.11-1.01 1.11-1.72 0-.69-.46-1.19-1.34-1.19-.78 0-1.27.39-1.55 1.24l-1.94-.81c.54-1.59 1.74-2.47 3.52-2.47 2.03 0 3.44 1.29 3.44 3.09 0 1.38-.72 2.19-1.59 3.12z'/>
+              </svg>
+            </a>
+            <a href='?page=welcome' class='help-home-icon' title='Home' aria-label='Home' style='text-decoration:none;'>
+              <svg viewBox='0 0 24 24' width='22' height='22' fill='#fff' aria-hidden='true'>
+                <path d='M12 5.69l5 4.5V18a1 1 0 0 1-1 1h-3v-4H11v4H8a1 1 0 0 1-1-1v-7.81l5-4.5m0-2.19L3 12h3v8a3 3 0 0 0 3 3h4v-5h2v5h4a3 3 0 0 0 3-3v-8h3L12 3.5z'/>
+              </svg>
+            </a>
+          </div>
+        </div>
+        <style>
+          .main-header.task-header { margin-top:-2.5rem; }
+        </style>
+        <script>
+        // Ensure same-tab navigation (defensive; Streamlit normally does this already)
+        document.querySelectorAll('.task-header a').forEach(a=>{
+          a.addEventListener('click', function(ev){
+            try { ev.preventDefault(); window.location = this.getAttribute('href'); } catch(e) {}
+          });
+        });
+        </script>
+        """,
+        unsafe_allow_html=True,
+    )
 
     def _safe_list(df, col, default_list):
         try:
