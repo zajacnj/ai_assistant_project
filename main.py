@@ -1870,34 +1870,26 @@ def show_help_page():
     </style>
     """, unsafe_allow_html=True)
 
-    # Build header HTML (outside iframe) with search controls & home icon
+    # Simple header - just title and home button (no search controls)
     header_html = """
     <div class='main-header help-header'>
       <div class='header-logo'><div class='header-logo-icon'></div> <span>Help &amp; How It Works</span></div>
-      <div class='help-search'>
-        <input id='help-search' type='search' placeholder='Search help...' aria-label='Search help' />
-        <select id='help-search-mode' aria-label='Search mode'>
-          <option value='any' selected>Any</option>
-          <option value='all'>All</option>
-          <option value='exact'>Exact</option>
-        </select>
-        <span id='help-search-count' style='color:#fff;opacity:.9;min-width:60px;'></span>
-        <button id='help-clear' title='Clear search'>Clear</button>
-        <button id='help-prev' title='Previous result'>◀</button>
-        <button id='help-next' title='Next result'>▶</button>
-      </div>
+      <div style='flex:1;'></div>
       <a href='?page=welcome' class='help-home-icon' id='help-home-server' title='Go to Welcome' aria-label='Go to Welcome'>
         <svg viewBox='0 0 24 24' aria-hidden='true' focusable='false'>
           <path d='M12 3.1 2 12h2.8v8h5.6v-5.2h3.2V20h5.6v-8H22L12 3.1zm0 2.4 6.4 5.6h-2v8h-3.2v-5.2H10.8V19H7.6v-8h-2L12 5.5z'></path>
         </svg>
       </a>
     </div>
+    """
+    st.markdown(header_html, unsafe_allow_html=True)
+    
+    st.markdown("""
     <script>
       (function(){
         const home = document.getElementById('help-home-server');
         if (home && !home.__sameTabBound){
           home.__sameTabBound = true;
-          // Remove any accidental target attribute
           home.removeAttribute('target');
           home.addEventListener('click', function(e){
             e.preventDefault();
@@ -1909,15 +1901,96 @@ def show_help_page():
         }
       })();
     </script>
-    <!-- Home icon uses direct href navigation -->
-    """
-    st.markdown(header_html, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-    # Render a Streamlit button styled as the home icon (server-side navigation reliable)
-  # Remove overlay button; we will embed home icon in header HTML (inside iframe) but handle navigation via parent listener.
-    
+    # Help content with INLINE search bar at the top (inside iframe, no cross-origin issues)
+    # UPDATED: 2025-11-04 - Added top border and adjusted spacing
     help_html = textwrap.dedent(r"""
+<style>
+  /* Updated help search bar - Nov 4, 2025 */
+  .help-search-bar {
+    background: linear-gradient(135deg, #005a9c 0%, #0073cf 100%);
+    padding: 24px 24px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-top: 3px solid #ffc107 !important;
+    border-bottom: 3px solid #ffc107 !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+  }
+  .help-search-bar input[type="search"] {
+    flex: 1;
+    padding: 11px 16px;
+    border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.3);
+    font-size: 15px;
+    transition: all 0.2s ease;
+  }
+  .help-search-bar input[type="search"]:focus {
+    outline: none;
+    border-color: #ffc107;
+    box-shadow: 0 0 0 3px rgba(255,193,7,0.25);
+  }
+  .help-search-bar select {
+    padding: 11px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .help-search-bar button {
+    padding: 11px 18px;
+    border-radius: 6px;
+    border: none;
+    background: #fff;
+    color: #003d72;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .help-search-bar button:hover:not(:disabled) {
+    background: #ffc107;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .help-search-bar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .help-search-count {
+    color: #fff;
+    font-weight: 600;
+    min-width: 90px;
+    text-align: center;
+    font-size: 14px;
+  }
+  /* Remove top margin and padding from help wrapper */
+  .help-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .help-page {
+    margin-top: 0;
+    padding-top: 0;
+  }
+</style>
+
 <div class="help-wrapper">
+<div class="help-search-bar">
+  <input id='help-search' type='search' placeholder='Search help topics...' aria-label='Search help' />
+  <select id='help-search-mode' aria-label='Search mode'>
+    <option value='any' selected>Any Word</option>
+    <option value='all'>All Words</option>
+    <option value='exact'>Exact Phrase</option>
+  </select>
+  <span id='help-search-count' class='help-search-count'></span>
+  <button id='help-clear'>Clear</button>
+  <button id='help-prev' title='Previous result'>&lt;</button>
+  <button id='help-next' title='Next result'>&gt;</button>
+</div>
 <div class="help-page">
   <aside class="help-sidebar">
     <h4>Guide</h4>
@@ -1931,9 +2004,6 @@ def show_help_page():
       <a href="#help-best">Best Practices</a>
       <a href="#help-trouble">Troubleshooting</a>
     </nav>
-    <div style="margin-top:12px; text-align:center;">
-      <a class="cta-btn cta-secondary" href="?page=welcome" target="_top">Back</a>
-    </div>
   </aside>
   <section class="help-content" id="help-content">
     <section class="help-section" id="help-start" data-label="Getting Started">
@@ -2177,13 +2247,30 @@ def show_help_page():
         <div class="help-step"><div class="dot">5</div><div class="txt">Contact your VA IT support or the application administrator for assistance</div></div>
       </div>
     </section>
-
-    <div style="text-align:center; margin-top: 16px;">
-      <a class="cta-btn cta-secondary" href="?page=welcome" target="_top">Back to Welcome</a>
-    </div>
   </section>
 </div>
 </div>
+
+<style>
+  /* Search highlight styles */
+  mark.help-hit {
+    background: #ffeb3b;
+    color: #000;
+    padding: 2px 0;
+    font-weight: 600;
+  }
+  mark.help-hit.current {
+    background: #ff9800;
+    color: #fff;
+  }
+  .help-search-bar button:hover {
+    background: #f0f0f0 !important;
+  }
+  .help-search-bar button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+</style>
 
 <script>
 (function(){
@@ -2192,8 +2279,12 @@ def show_help_page():
   const countSpan = document.getElementById('help-search-count');
   const prevBtn = document.getElementById('help-prev');
   const nextBtn = document.getElementById('help-next');
+  const clearBtn = document.getElementById('help-clear');
   const sections = Array.from(document.querySelectorAll('.help-section'));
   const links = Array.from(document.querySelectorAll('.help-nav a'));
+  
+  window.__helpMatches = [];
+  window.__helpMatchIdx = -1;
 
   function setActive(id){
     links.forEach(a => {
@@ -2285,13 +2376,13 @@ def show_help_page():
     if (!q){
       // reset view
       sections.forEach(sec => sec.style.display = '');
-      countSpan && (countSpan.textContent = '');
-      prevBtn && (prevBtn.disabled = true);
-      nextBtn && (nextBtn.disabled = true);
+      if(countSpan) countSpan.textContent = '';
+      if(prevBtn) prevBtn.disabled = true;
+      if(nextBtn) nextBtn.disabled = true;
       applyFromHash();
       return;
     }
-    const toks = q.split(/\\s+/).filter(Boolean);
+    const toks = q.split(/\s+/).filter(Boolean);
     const lowerToks = toks.map(t => t.toLowerCase());
     const re = new RegExp('(' + (mode === 'exact' ? escapeRegExp(q) : lowerToks.map(escapeRegExp).join('|')) + ')', 'gi');
 
@@ -2309,9 +2400,9 @@ def show_help_page():
     });
 
     const total = window.__helpMatches.length;
-    countSpan && (countSpan.textContent = total ? total + ' results' : '0 results');
-    prevBtn && (prevBtn.disabled = total <= 1);
-    nextBtn && (nextBtn.disabled = total <= 1);
+    if(countSpan) countSpan.textContent = total > 0 ? total + ' results' : '0 results';
+    if(prevBtn) prevBtn.disabled = total <= 1;
+    if(nextBtn) nextBtn.disabled = total <= 1;
 
     if (total > 0){
       window.__helpMatchIdx = 0;
@@ -2364,31 +2455,42 @@ def show_help_page():
     });
   });
 
-  if (input){
-    input.addEventListener('input', doSearch);
-    input.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); doSearch(); }});
+  // Wire up search controls
+  if(input){
+    let searchTimeout;
+    input.addEventListener('input', function(){
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(doSearch, 300);
+    });
+    input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ 
+        e.preventDefault(); 
+        clearTimeout(searchTimeout);
+        doSearch(); 
+      }
+    });
   }
-  if (modeSel){ modeSel.addEventListener('change', doSearch); }
-  // Clear button
-  const clearBtn = document.getElementById('help-clear');
-  if (clearBtn){ clearBtn.addEventListener('click', function(){
-    if (input) input.value = '';
-    if (modeSel) modeSel.value = 'any';
+  if(modeSel){ modeSel.addEventListener('change', doSearch); }
+  if(clearBtn){ clearBtn.addEventListener('click', function(){
+    if(input) input.value = '';
+    if(modeSel) modeSel.value = 'any';
     clearHighlights();
     sections.forEach(sec => sec.style.display = '');
-    countSpan && (countSpan.textContent = '');
-    prevBtn && (prevBtn.disabled = true);
-    nextBtn && (nextBtn.disabled = true);
+    if(countSpan) countSpan.textContent = '';
+    if(prevBtn) prevBtn.disabled = true;
+    if(nextBtn) nextBtn.disabled = true;
     applyFromHash();
     try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(_) { window.scrollTo(0,0); }
   }); }
-
-  if (prevBtn){ prevBtn.addEventListener('click', function(){
-    const i = (window.__helpMatchIdx || 0) - 1; jumpToMatch(i);
+  if(prevBtn){ prevBtn.addEventListener('click', function(){
+    const i = (window.__helpMatchIdx || 0) - 1; 
+    jumpToMatch(i);
   }); }
-  if (nextBtn){ nextBtn.addEventListener('click', function(){
-    const i = (window.__helpMatchIdx || 0) + 1; jumpToMatch(i);
+  if(nextBtn){ nextBtn.addEventListener('click', function(){
+    const i = (window.__helpMatchIdx || 0) + 1; 
+    jumpToMatch(i);
   }); }
+  
   window.addEventListener('hashchange', applyFromHash);
   applyFromHash();
   try { window.scrollTo(0,0); } catch(_){ }

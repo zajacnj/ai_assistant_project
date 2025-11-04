@@ -3,12 +3,17 @@
 fileWatcherType = "poll"
 # Reload the app automatically when files change
 runOnSave = true
-# Headless mode required for Streamlit Cloud deployment
+# Headless mode for cloud deployment (set to false for local dev if needed)
 headless = true
-# Port configuration for cloud hosting
-port = 8501
-enableCORS = false
+# Custom port to avoid conflicts with other Streamlit apps
+port = 8502
+# CORS and XSRF must be compatible - keeping defaults for security
+# enableCORS defaults to true when enableXsrfProtection is true
 enableXsrfProtection = true
+# Set max upload size (optional, default is 200MB)
+maxUploadSize = 200
 
 [browser]
 gatherUsageStats = false
+# Automatically open browser on local runs
+serverAddress = "localhost"

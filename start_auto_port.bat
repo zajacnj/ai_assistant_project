@@ -17,7 +17,7 @@ for /L %%p in (%BASE_PORT%,1,%MAX_PORT%) do (
         netstat -an | findstr ":%%p " | findstr "LISTENING" >nul
         if errorlevel 1 (
             set FOUND_PORT=%%p
-            echo ✓ Found available port: %%p
+            echo Found available port: %%p
             echo.
             echo Starting app on port %%p...
             echo App will open at http://localhost:%%p
@@ -26,7 +26,7 @@ for /L %%p in (%BASE_PORT%,1,%MAX_PORT%) do (
             py -3 -m streamlit run "main.py" --server.port=%%p --server.fileWatcherType=poll --server.runOnSave=true
             goto :end
         ) else (
-            echo Port %%p is already in use, trying next...
+            echo Port %%p is in use, trying next...
         )
     )
 )
