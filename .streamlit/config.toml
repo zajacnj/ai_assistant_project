@@ -3,8 +3,12 @@
 fileWatcherType = "poll"
 # Reload the app automatically when files change
 runOnSave = true
-# Open browser (non-headless) so .\start launches the app visibly
-headless = false
+# Headless mode required for Streamlit Cloud deployment
+headless = true
+# Port configuration for cloud hosting
+port = 8501
+enableCORS = false
+enableXsrfProtection = true
 
 [browser]
 gatherUsageStats = false
